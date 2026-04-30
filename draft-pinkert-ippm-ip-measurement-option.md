@@ -15,12 +15,12 @@ keyword:
  - measurement data
  - ip option
 venue:
-  group: ippm
-  type: Working Group
-  mail: WG@example.com
-  arch: https://example.com/WG
-  github: USER/REPO
-  latest: https://example.com/LATEST
+  group: "IP Performance Measurement"
+  type: "Working Group"
+  mail: "ippm@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/ippm/"
+  github: "DutchyatWork/rfc-draft-ip-measurement-option"
+  latest: "https://dutchyatwork.github.io/rfc-draft-ip-measurement-option/#go.draft-pinkert-ippm-ip-measurement-option.html"
 
 author:
  -  fullname: Tjeerd J. Pinkert
