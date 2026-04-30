@@ -23,7 +23,7 @@ venue:
   latest: https://example.com/LATEST
 
 author:
- -  fullname: dr. ir. Tjeerd J. Pinkert
+ -  fullname: Tjeerd J. Pinkert
     organization: Siemens Mobility GmbH
     street: Ackerstrasse 22
     code: '38126'
@@ -64,40 +64,63 @@ contributor:
     country: Germany
     email: gert.bolz@siemens.com
     uri: https://www.mobility.siemens.com
-
- 
 normative:
   RFC791:
   RFC8200:
-
 informative:
-  IANA-IP-Option-Numbers: https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1
-  IEEE802.3: Institute of Electrical and Electronics Engineers, "IEEE Standard for Ethernet", 13 May 2022
-  IEEE1588-2019: Institute of Electrical and Electronics Engineers, "IEEE Standard for a Precision Clock Synchronization Protocol for Networked Measurement and Control Systems", 7 November 2019
-  MEF10.4: Metro Ethernet Forum, "Subscriber Ethernet Service Attributes", December 2018
-  Nokia: https://www.nokia.com/about-us/news/releases/2020/03/13/nokia-bell-labs-world-records-and-innovations-in-fiber-optics-to-enable-faster-and-higher-capacity-5g-networks-of-the-future/
-  RFC1122]:
-  RFC2330]:
-  RFC2474]:
-  RFC2475]:
-  RFC2819]:
-  RFC3168]:
-  RFC3393]:
-  RFC4656]:
-  RFC5357]:
-  RFC5905]:
-  RFC6437]:
-  RFC6621]:
-  RFC6864]:
-  RFC7011]:
-  RFC7014]:
-  RFC7679]:
-  RFC7680]:
-  RFC7799]:
-  RFC9330]:
-  RFC9331]:
-  RFC9332]:
-  RFC9341]:
+  RFC1122:
+  RFC2330:
+  RFC2474:
+  RFC2475:
+  RFC2819:
+  RFC3168:
+  RFC3393:
+  RFC4656:
+  RFC5357:
+  RFC5905:
+  RFC6437:
+  RFC6621:
+  RFC6864:
+  RFC7011:
+  RFC7014:
+  RFC7679:
+  RFC7680:
+  RFC7799:
+  RFC9330:
+  RFC9331:
+  RFC9332:
+  RFC9341:
+  IANA-IP-Option-Numbers:
+    target: https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1
+    title: IP Option Numbers
+    author:
+      -
+        org: IANA
+  IEEE802.3:
+    title: IEEE Standard for Ethernet
+    date: 13 May 2022
+    author:
+      -
+        org: Institute of Electrical and Electronics Engineers
+  IEEE1588-2019:
+    title: IEEE Standard for a Precision Clock Synchronization Protocol for Networked Measurement and Control Systems
+    date: 7 November 2019
+    author:
+      -
+        org: Institute of Electrical and Electronics Engineers
+  MEF10.4:
+    title: Subscriber Ethernet Service Attributes
+    date: December 2018
+    author:
+      -
+        org: Metro Ethernet Forum
+  Nokia:
+    target: https://www.nokia.com/about-us/news/releases/2020/03/13/nokia-bell-labs-world-records-and-innovations-in-fiber-optics-to-enable-faster-and-higher-capacity-5g-networks-of-the-future/
+    title: Noka Bell Labs' world records and innovations in fibre optics to enable faster and higher capacity 5G networks of the future
+    date: 13 March 2020
+    author:
+      -
+        org: Nokia
 
 ...
 
@@ -147,7 +170,7 @@ sequence number and a timestamp from the sending host at the receiving host.
 In internetworks, the IP protocol is the unifying protocol in the network
 stack. At the link layer various network technologies can be deployed that
 are all capable of transporting IP packets. Although measurement techniques
-and specifications are present for the lower layers, it is typically hard to 
+and specifications are present for the lower layers, it is typically hard to
 implement these such, that data from specific applications on a host can be
 measured.
 
@@ -394,7 +417,7 @@ for user content.
 The IPv6 protocol allows for 258 octet options of which 256 can be used for
 user contents.
 
-Regarding time transfer techniques, two standards exist. The [IEEE1588]
+Regarding time transfer techniques, two standards exist. The [IEEE1588-2019]
 precision time protocol version 3 (PTPv3) is concipated to work with Ethernet,
 the IPv4 and IPv6 protocols, and the UDP protocol. The network time protocol
 version 4 (NTPv4) [RFC5905] is used in the scope of IPv4 and IPv6. The PTP
@@ -503,11 +526,11 @@ counter.
 
 The IP ID field seems a good numerator candidate for counting datagrams, but
 it is currently specified to be solely used for fragmentation and reassembly
-by [RFC 6864]. Therefore, it is not suitable for measurement purposes (it is
+by [RFC6864]. Therefore, it is not suitable for measurement purposes (it is
 always zero for unfragmented packets) also because some sources do not vary
 the ID at all.
 
-Duplication detection may be based on hashes [RFC 6621], but loss and
+Duplication detection may be based on hashes [RFC6621], but loss and
 reordering measurements are not possible when higher protocol layers lack
 information to detect these. This is e.g. the case with UDP. A timestamp can
 thus not replace a numerator field, since it does not show whether packets are
@@ -726,72 +749,83 @@ measurement option is therefore defined as follows.
      |                                                               |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-Option Type: 8 bits  
-  The IP measurement option is a debugging and measurement option, and must be
-  present in each fragment of an IP datagram. Two option types are requested,
-  one for non-encrypted options, with or without signature, and one for
-  encrypted options, that can only be read by systems on the path that belong
-  to the trusted group of measurement clients.
+Option Type: 8 bits
 
-  Bit  8   (copied flag)  : 1 = copied  
-  Bit  6-7 (option class  : 2 = debugging and measurement  
-  Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),  
-                                                to be assigned by IANA  
-  Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),  
-                                                to be assigned by IANA  
+> The IP measurement option is a debugging and measurement option, and must be
+> present in each fragment of an IP datagram. Two option types are requested,
+> one for non-encrypted options, with or without signature, and one for
+> encrypted options, that can only be read by systems on the path that belong
+> to the trusted group of measurement clients.
+>
+> The option may be skipped over if the Option Type is unknown, and the option
+> data does not change en-route.
+>
+> - Bit  8   (copied flag)   : 1 = copied
+> - Bit  6-7 (option class)  : 2 = debugging and measurement
+> - Bits 1-5 (option number) : 26 = Unencrypted Measurement Option (UMO),
+>                                                    to be assigned by IANA
+> - Bits 1-5 (option number) : 27 = Encrypted Measurement Option (EMO),
+>                                                    to be assigned by IANA
+>
+> Value becomes 218 and 219
 
-  Value becomes 218 and 219
+Option Length: 8 bits
 
-Option Length: 8 bits  
-  The length of the IP measurement option in octets, including length of the
-  cryptographic signature when present. For an encrypted and signed
-  measurement option, all octets are included in the length.
+> The length of the IP measurement option in octets, including length of the
+> cryptographic signature when present. For an encrypted and signed
+> measurement option, all octets are included in the length.
 
-Unique Identifier (UID): 16 bits  
-  The Unique Identifier is incremented for each sent IP packet. This allows
-  the receiving host to identify packet losses, duplications and re-orderings.
-  It must be noted that each fragment of a fragmented datagram contains a copy
-  of the IP measurement option. Therefore systems "on the path" should rely,
-  e.g., on the fragment offset to perform such measurements. End-hosts perform
-  measurements on the packet before fragmenting and after re-assembly.
+Unique Identifier (UID): 16 bits
 
-Flow Label: 20 bits  
-  The Flow Label as specified in the IPv6 standard [RFC8200].
+> The Unique Identifier is incremented for each sent IP packet. This allows
+> the receiving host to identify packet losses, duplications and re-orderings.
+> It must be noted that each fragment of a fragmented datagram contains a copy
+> of the IP measurement option. Therefore systems "on the path" should rely,
+> e.g., on the fragment offset to perform such measurements. End-hosts perform
+> measurements on the packet before fragmenting and after re-assembly.
 
-Seconds: 12 bits  
-  The 12 least significant bits of the seconds field of the PTP Timestamp.
+Flow Label: 20 bits
 
-Usage Flags: 2 bits  
-  The Usage Flags indicate how the option can be used by the receiving host.
+> The Flow Label as specified in the IPv6 standard [RFC8200].
 
-  Bit 0: 0 = Dont include in measurement', 1 = Include in measurement  
-  Bit 1: Alternate Marker  
+Seconds: 12 bits
 
-  The I(nclude in measurement) flag signals whether or not the IP measurement
-  option contains real data. Sending empty data (all 0) may be done to relieve
-  computational efforts of the sending systems under high data traffic loads,
-  while keeping the IP header size equal for all IP packets. For signed
-  connections the cryptographic signature must also be applied on "empty" IP
-  measurement options, since spoofing would otherwise be possible.
+> The 12 least significant bits of the seconds field of the PTP Timestamp.
 
-  The A(lternate Marker) can be used to implement alternate marker measurement
-  methods. Alternate marker methods using this IP measurement option, must
-  specify how they use this bit.
+Usage Flags: 2 bits
 
-Nanoseconds: 30 bits  
-  The nanoseconds field contains the number of nanoseconds of the timestamp.
-  When a system is not capable of providing timestamps with nanosecond
-  resolution, the highest resolution that can be provided is used and the
-  other digits of the nanosecond field are set to 0. When a system uses, e.g.,
-  a 16-bit subdivision of one second (such as NTP timestamps may), the decimal
-  value is rounded to the nearest nanosecond. Adding or subtracting a certain
-  random number of nanoseconds to the result may be used to prevent rounding
-  bias. This is up to the implementer of the IP measurement option for a
-  system, but must be documented.
+> The Usage Flags indicate how the option can be used by the receiving host.
+>
+> - Bit 0: 0 = Dont include in measurement', 1 = Include in measurement
+> - Bit 1: Alternate Marker
+>
+> The I(nclude in measurement) flag signals whether or not the IP measurement
+> option contains real data. Sending empty data (all 0) may be done to relieve
+> computational efforts of the sending systems under high data traffic loads,
+> while keeping the IP header size equal for all IP packets. For signed
+> connections the cryptographic signature must also be applied on "empty" IP
+> measurement options, since spoofing would otherwise be possible.
+>
+> The A(lternate Marker) can be used to implement alternate marker measurement
+> methods. Alternate marker methods using this IP measurement option, must
+> specify how they use this bit.
 
-(Optional) Cryptographic Signature:  
-  Optionally up to 7 words, 28 octets, or 224 bits can be used for the
-  transmission of a cryptographic signature.
+Nanoseconds: 30 bits
+
+> The nanoseconds field contains the number of nanoseconds of the timestamp.
+> When a system is not capable of providing timestamps with nanosecond
+> resolution, the highest resolution that can be provided is used and the
+> other digits of the nanosecond field are set to 0. When a system uses, e.g.,
+> a 16-bit subdivision of one second (such as NTP timestamps may), the decimal
+> value is rounded to the nearest nanosecond. Adding or subtracting a certain
+> random number of nanoseconds to the result may be used to prevent rounding
+> bias. This is up to the implementer of the IP measurement option for a
+> system, but must be documented.
+
+(Optional) Cryptographic Signature:
+
+> Optionally up to 7 words, 28 octets, or 224 bits can be used for the
+> transmission of a cryptographic signature.
 
 The option order has been chosen such that when this option is the first
 option, the data aligns in the IP packet, hopefully resulting in an efficient
@@ -800,7 +834,7 @@ EOOL option is needed when this option is the only one [RFC791],
 [IANA-IP-Option-Numbers].
 
 When the option is encrypted only the first two octets have their normal
-meaning. The rest of the octets form the cyphertext.
+meaning. The rest of the octets form the ciphertext.
 
 
 # IPv6 option definition
@@ -827,76 +861,89 @@ measurement option will be defined as follows.
      |                                                               |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-Option Type: 8 bits  
-  The option may be skipped over if the Option Type is unknown, and the option
-  data does not change en-route.
+Option Type: 8 bits
 
-  Bit  8   (copied flag)  : 1 = copied  
-  Bit  6-7 (option class  : 2 = debugging and measurement  
-  Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),  
-                                                to be assigned by IANA  
-  Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),  
-                                                to be assigned by IANA  
+> The IP measurement option is a debugging and measurement option, and must be
+> present in each fragment of an IP datagram. Two option types are requested,
+> one for non-encrypted options, with or without signature, and one for
+> encrypted options, that can only be read by systems on the path that belong
+> to the trusted group of measurement clients.
+>
+> The option may be skipped over if the Option Type is unknown, and the option
+> data does not change en-route.
+>
+> - Bit  8   (copied flag)  : 1 = copied
+> - Bit  6-7 (option class  : 2 = debugging and measurement
+> - Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),
+>                                                to be assigned by IANA
+> - Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),
+>                                                to be assigned by IANA
+>
+> Value becomes 218 and 219
 
-  Value becomes 218 and 219
+Option Length: 8 bits
 
-Option Length: 8 bits  
-  The length of the IP measurement option in octets, including length of the
-  cryptographic signature when present. For an encrypted and signed
-  measurement option all octets are included in the length.
+> The length of the IP measurement option in octets, including length of the
+> cryptographic signature when present. For an encrypted and signed
+> measurement option all octets are included in the length.
 
-Seconds: 16 bits  
-  The 16 least significant bits of the seconds field of the PTP Timestamp.
-  When the IPv4 algorithms are used for calculations, the four most
-  significant bits of the Seconds field may be skipped.
+Seconds: 16 bits
 
-Usage Flags: 2 bits  
-  The Usage Flags indicate how the option can be used by the receiving host.
+> The 16 least significant bits of the seconds field of the PTP Timestamp.
+> When the IPv4 algorithms are used for calculations, the four most
+> significant bits of the Seconds field may be skipped.
 
-  Bit 0: 0 = Dont include in measurement', 1 = Include in measurement  
-  Bit 1: Alternate Marker
+Usage Flags: 2 bits
 
-  The I(nclude in measurement) flag signals whether or not the IP measurement
-  option contains real data. Sending empty data (all 0) may be done to relieve
-  computational efforts of the sending systems under high data traffic loads,
-  while keeping the IP header size equal for all IP packets. For signed
-  connections the cryptographic signature must also be applied on "empty" IP
-  measurement options.
+> The Usage Flags indicate how the option can be used by the receiving host.
+>
+> - Bit 0: 0 = Dont include in measurement', 1 = Include in measurement
+> - Bit 1: Alternate Marker
+>
+> The I(nclude in measurement) flag signals whether or not the IP measurement
+> option contains real data. Sending empty data (all 0) may be done to relieve
+> computational efforts of the sending systems under high data traffic loads,
+> while keeping the IP header size equal for all IP packets. For signed
+> connections the cryptographic signature must also be applied on "empty" IP
+> measurement options.
+>
+> The A(lternate Marker) can be used to implement alternate marker measurement
+> methods. Alternate marker methods using this IP measurement option, must
+> specify how they use this bit.
 
-  The A(lternate Marker) can be used to implement alternate marker measurement
-  methods. Alternate marker methods using this IP measurement option, must
-  specify how they use this bit.
+Nanoseconds: 30 bits
 
-Nanoseconds: 30 bits  
-  The nanoseconds field contains the number of nanoseconds of the timestamp.
-  When a system is not capable of providing timestamps with nanosecond
-  resolution, the highest resolution that can be provided is used and the
-  other digits of the nanosecond field are set to 0. When a system uses, e.g.,
-  a 16-bit subdivision of one second (such as NTP timestamps may), the decimal
-  value is rounded to the nearest nanosecond. Adding or subtracting a certain
-  random number of nanoseconds to the result may be used to prevent rounding
-  bias. This is up to the implementer of the IP measurement option for a
-  system, but must be documented.
+> The nanoseconds field contains the number of nanoseconds of the timestamp.
+> When a system is not capable of providing timestamps with nanosecond
+> resolution, the highest resolution that can be provided is used and the
+> other digits of the nanosecond field are set to 0. When a system uses, e.g.,
+> a 16-bit subdivision of one second (such as NTP timestamps may), the decimal
+> value is rounded to the nearest nanosecond. Adding or subtracting a certain
+> random number of nanoseconds to the result may be used to prevent rounding
+> bias. This is up to the implementer of the IP measurement option for a
+> system, but must be documented.
 
-Unique Identifier (UID): 32 bits  
-  The Unique Identifier is incremented for each sent IP packet. This allows
-  the receiving host to identify packet losses, duplications and re-orderings.
-  It must be noted that each fragment of a fragmented datagram contains a copy
-  of the IP measurement option. Therefore systems "on the path" should rely,
-  e.g., on the fragment offset to perform such measurements. End-hosts perform
-  measurements on the packet before fragmenting and after re-assembly.
-  Note that the 16 least significant bits of the UID can be used with the IPv4
-  algorithms, since they roll over in similar fashion. The full 32-bit UID has
-  relevance on very fast IPv6 links.
+Unique Identifier (UID): 32 bits
 
-(Optional) Cryptographic Signature:  
-  Optionally up to 63 words, 252 octets, or 2016 bits can be used for the
-  transmission of a cryptographic signature.
+> The Unique Identifier is incremented for each sent IP packet. This allows
+> the receiving host to identify packet losses, duplications and re-orderings.
+> It must be noted that each fragment of a fragmented datagram contains a copy
+> of the IP measurement option. Therefore systems "on the path" should rely,
+> e.g., on the fragment offset to perform such measurements. End-hosts perform
+> measurements on the packet before fragmenting and after re-assembly.
+> Note that the 16 least significant bits of the UID can be used with the IPv4
+> algorithms, since they roll over in similar fashion. The full 32-bit UID has
+> relevance on very fast IPv6 links.
+
+(Optional) Cryptographic Signature:
+
+> Optionally up to 63 words, 252 octets, or 2016 bits can be used for the
+> transmission of a cryptographic signature.
 
 As the flow identifier is an integral 20-bit field in the IPv6 header it is
 not included in the IPv6 measurement option. When the option is encrypted only
 the first two octets have their normal meaning. The rest of the octets form
-the cyphertext.
+the ciphertext.
 
 This option shall be aligned in a 4n fashion.
 
@@ -991,7 +1038,7 @@ to calculate metrics on microflows that do not carry the MO option. Thoughts
 on raw data formats for statistical analysis by a data collection system are
 given in Notes for raw metering protocols.
 
- 
+
 ## Measurement procedure at observers
 
 Each switch with deep packet inspection capabilities, each router and host
@@ -1133,7 +1180,7 @@ However, the author of this RFC would not endorse such a method as secure.
 
 This document requests two IP option numbers to be registered by IANA.
 
-Option Type: 8 bits  
+Option Type: 8 bits
   The IP measurement option is a debugging and measurement option, and must be
   present in each fragment of an IP datagram carrying the IP measurement
   option. Two option types are requested, one for non-encrypted options,
@@ -1141,14 +1188,14 @@ Option Type: 8 bits
   read by systems on the path that belong to the trusted group of measurement
   clients.
 
-  Bit      8 (copied flag): 1 = copied  
-  Bit    6-7 (option class: 2 = debugging and measurement  
-  Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),  
-                                                to be assigned by IANA  
-  Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),  
-                                                to be assigned by IANA  
+  Bit      8 (copied flag): 1 = copied
+  Bit    6-7 (option class: 2 = debugging and measurement
+  Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),
+                                                to be assigned by IANA
+  Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),
+                                                to be assigned by IANA
 
-This means values 218 and 219 
+This means values 218 and 219
 
 It depends on the IANA policy if the option number for encrypted options
 should already be reserved, since there is no current implementation of it
