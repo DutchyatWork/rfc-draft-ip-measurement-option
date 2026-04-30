@@ -1184,23 +1184,15 @@ However, the author of this RFC would not endorse such a method as secure.
 
 This document requests two IP option numbers to be registered by IANA.
 
-Option Type: 8 bits
+    Name: Unencrypted measurement option
+    Abbreviation: UMO
+    Option class: Debugging and measurement (2)
+    Copy: Yes (1)
 
-> The IP measurement option is a debugging and measurement option, and must be
-> present in each fragment of an IP datagram carrying the IP measurement
-> option. Two option types are requested, one for non-encrypted options,
-> with or without signature, and one for encrypted options, that can only be
-> read by systems on the path that belong to the trusted group of measurement
-> clients.
->
-> - Bit      8 (copied flag): 1 = copied
-> - Bit    6-7 (option class: 2 = debugging and measurement
-> - Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),
->                                               to be assigned by IANA
-> - Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),
->                                               to be assigned by IANA
->
-> This means values 218 and 219
+    Name: Encrypted measurement option
+    Abbreviation: EMO
+    Option class: Debugging and measurement (2)
+    Copy: Yes (1)
 
 It depends on the IANA policy if the option number for encrypted options
 should already be reserved, since there is no current implementation of it
