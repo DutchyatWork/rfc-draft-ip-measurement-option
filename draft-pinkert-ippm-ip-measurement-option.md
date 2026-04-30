@@ -209,8 +209,9 @@ the benefits of being capable of assessing the network quality at real-time.
 
 The IP measurement option will be designed specifically for the following
 metrics:
-    - One-way Packet Delay, Mean Packet Delay, Packet Delay Variation,
-    - One-way Packet Loss, Packet Reordering and Packet Duplication.
+
+- One-way Packet Delay, Mean Packet Delay, Packet Delay Variation,
+- One-way Packet Loss, Packet Reordering and Packet Duplication.
 
 The measurement option must be suitable for the measurement of microflows as
 defined by [RFC2475] in the scope of DS. Microflows are identified by IP
@@ -594,7 +595,7 @@ to the IP measurement option.
 
 1. Proof of integrity of the IP measurement option, while keeping the content
    available for third parties to use.
-2. Encryption of the contents of the IP measurement option to hide the content
+1. Encryption of the contents of the IP measurement option to hide the content
    for third parties.
 
 Since the IP header, including the IP measurement option can be freely
@@ -629,18 +630,19 @@ the path". It can therefore not be used as input for cryptographic signatures.
 
 To perform various measurements the signature must be made over a pseudo
 header including the following data:
+
 1. IP version
-2. IP internet header length (Fixed value, 10 words)
-3. IP total length (Payload length)
-4. IP protocol type (Next header field)
-4a. (Flow Label)
-5. IP source address
-6. IP destination address
-7. IP measurement option, including:
-    a. IP option type
-    b. IP option length
-    c. IP measurement option data excluding the signature / signature hash.
-8. Hash over the IP packet data. (Hash over Payload)
+1. IP internet header length (Fixed value, 10 words)
+1. IP total length (Payload length)
+1. IP protocol type (Next header field)
+1. IP Flow Label (optionally)
+1. IP source address
+1. IP destination address
+1. IP measurement option, including:
+   - IP option type
+   - IP option length
+   - IP measurement option data excluding the signature / signature hash.
+1. Hash over the IP packet data. (Hash over Payload)
 
 The fields in the pseudo header are composed as follows for the IPv4 protocol:
 
