@@ -2405,39 +2405,66 @@ protocols and are deemed lost.<a href="#section-9.4-1" class="pilcrow">¶</a></p
 <a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-notes-for-raw-metering-data" class="section-name selfRef">Notes for raw metering data protocols</a>
         </h3>
 <p id="section-9.5-1">When sending raw data to an analysis system for full system analysis the
-following must be included in a data unit per package. Such a feature can,
-of course, only be used when the network has sufficient capacity left to send
-this additional data. A protocol specification is left to the implementer.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
-<p id="section-9.5-2">One data unit would contain a flow identification <span>[<a href="#RFC6437" class="cite xref">RFC6437</a>]</span> consisting of:
-- source IP address (32 or 128 bit)
-- destination IP address (32 or 128 bit)
-- flow ID (20 bit)
-or, when it occupies less bits, a hash (e.g. for IPv6), and measurement data:
-- NUM field (16 bit)
-- TTS nanosecond counter (32 bit)
-- TTS second counter (12 bit)
-- RTS nanosecond counter (32 bit)
-- RTS second counter (12 bit)<a href="#section-9.5-2" class="pilcrow">¶</a></p>
-<p id="section-9.5-3">for IPv4 this is a total of 188 bits. For IPv6 this could be 160-bit for a
+following must be included in a data unit per measured packet. Such a feature
+can, of course, only be used when the network has sufficient capacity left to
+send this additional data. A protocol specification is left to the
+implementer.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<p id="section-9.5-2">One data unit would contain a flow identification <span>[<a href="#RFC6437" class="cite xref">RFC6437</a>]</span> consisting of:<a href="#section-9.5-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.5-3.1">
+            <p id="section-9.5-3.1.1">source IP address (32 or 128 bit)<a href="#section-9.5-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.2">
+            <p id="section-9.5-3.2.1">destination IP address (32 or 128 bit)<a href="#section-9.5-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.3">
+            <p id="section-9.5-3.3.1">flow ID (20 bit)
+or, when it occupies less bits, a hash (e.g. for IPv6), and measurement data:<a href="#section-9.5-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.4">
+            <p id="section-9.5-3.4.1">NUM field (16 bit)<a href="#section-9.5-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.5">
+            <p id="section-9.5-3.5.1">TTS nanosecond counter (32 bit)<a href="#section-9.5-3.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.6">
+            <p id="section-9.5-3.6.1">TTS second counter (12/16 bit)<a href="#section-9.5-3.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.7">
+            <p id="section-9.5-3.7.1">RTS nanosecond counter (32 bit)<a href="#section-9.5-3.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.8">
+            <p id="section-9.5-3.8.1">RTS second counter (12/16 bit)<a href="#section-9.5-3.8.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-9.5-4">for IPv4 this is a total of 188 bits. For IPv6 this could be 160-bit for a
 flow hash (e.g. SHA1) and 104-bit for the measurement data (264 bit). It is
-proposed that source hosts set the RTS fields to 0.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
-<p id="section-9.5-4">Multiple data units can be packed in one IP packet for the measurement system
+proposed that source hosts set the RTS fields to 0.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
+<p id="section-9.5-5">Multiple data units can be packed in one IP packet for the measurement system
 A specification for such a protocol can be created when needed. This could
 include the traditional Diffserv ports + protocol for IPv4 for non-MO enabled
-measurements.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
-<p id="section-9.5-5">A consideration could be to include in these data the following data for the
-observer transmission time:
-- ONUM field (16 bit)
-- OTTS nanosecond counter (32 bit)
-- OTTS second counter (12 bit)
-where ONUM is the observer NUM field at transmission, and OTTS is the
+measurements.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
+<p id="section-9.5-6">A consideration could be to include in these data the following data for the
+observer transmission time:<a href="#section-9.5-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.5-7.1">
+            <p id="section-9.5-7.1.1">ONUM field (16 bit)<a href="#section-9.5-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-7.2">
+            <p id="section-9.5-7.2.1">OTTS nanosecond counter (32 bit)<a href="#section-9.5-7.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-7.3">
+            <p id="section-9.5-7.3.1">OTTS second counter (12 bit)<a href="#section-9.5-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-9.5-8">where ONUM is the observer NUM field at transmission, and OTTS is the
 observer transmission time stamp. This would allow to separate wire and
-system time for an observer.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
-<p id="section-9.5-6">Alternatively, packets can almost always be identified based on a hash. Hash
+system time for an observer.<a href="#section-9.5-8" class="pilcrow">¶</a></p>
+<p id="section-9.5-9">Alternatively, packets can almost always be identified based on a hash. Hash
 based measurement methods <span>[<a href="#RFC7014" class="cite xref">RFC7014</a>]</span> would nevertheless need to send at least
 the timestamps in order to determine the system delays for packets. It is
 therefore not necessarily cheaper (bit and computation wise) to use a hash
-based measurement approach.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
+based measurement approach.<a href="#section-9.5-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
