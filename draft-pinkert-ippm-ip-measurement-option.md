@@ -1116,20 +1116,22 @@ protocols and are deemed lost.
 ## Notes for raw metering data protocols
 
 When sending raw data to an analysis system for full system analysis the
-following must be included in a data unit per package. Such a feature can,
-of course, only be used when the network has sufficient capacity left to send
-this additional data. A protocol specification is left to the implementer.
+following must be included in a data unit per measured packet. Such a feature
+can, of course, only be used when the network has sufficient capacity left to
+send this additional data. A protocol specification is left to the
+implementer.
 
 One data unit would contain a flow identification [RFC6437] consisting of:
+
 - source IP address (32 or 128 bit)
 - destination IP address (32 or 128 bit)
 - flow ID (20 bit)
 or, when it occupies less bits, a hash (e.g. for IPv6), and measurement data:
 - NUM field (16 bit)
 - TTS nanosecond counter (32 bit)
-- TTS second counter (12 bit)
+- TTS second counter (12/16 bit)
 - RTS nanosecond counter (32 bit)
-- RTS second counter (12 bit)
+- RTS second counter (12/16 bit)
 
 for IPv4 this is a total of 188 bits. For IPv6 this could be 160-bit for a
 flow hash (e.g. SHA1) and 104-bit for the measurement data (264 bit). It is
@@ -1142,9 +1144,11 @@ measurements.
 
 A consideration could be to include in these data the following data for the
 observer transmission time:
+
 - ONUM field (16 bit)
 - OTTS nanosecond counter (32 bit)
 - OTTS second counter (12 bit)
+
 where ONUM is the observer NUM field at transmission, and OTTS is the
 observer transmission time stamp. This would allow to separate wire and
 system time for an observer.
