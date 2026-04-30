@@ -1,0 +1,2818 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>An IPv4 and IPv6 measurement option (MO) for hybrid flow measurements.</title>
+<meta content="Tjeerd J. Pinkert" name="author">
+<meta content="Negar Masoudifar" name="author">
+<meta content="Akachukwu Adnife Nnamdi" name="author">
+<meta content="
+       This document introduces an internet protocol (IP) measurement option (MO) that
+contains information, normally not available to the receiver of IP packets, to
+perform hybrid network measurements. In particular, measurements that need a
+sender time stamp and a packet order number are then possible directly at the
+receiver. The information contained in the IP MO can also be used by hosts
+en-route to perform slightly more limited hybrid network measurements. 
+    " name="description">
+<meta content="xml2rfc 3.33.0" name="generator">
+<meta content="hybrid network measurements" name="keyword">
+<meta content="measurement data" name="keyword">
+<meta content="ip option" name="keyword">
+<meta content="draft-pinkert-ippm-ip-measurement-option-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.33.0
+    Python 3.12.13
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.0.2
+    platformdirs 4.9.6
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.32.5
+    wcwidth 0.6.0
+-->
+<link href="draft-pinkert-ippm-ip-measurement-option.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow, a.pilcrow:focus {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">An IPv4 and IPv6 measurement option (MO)</td>
+<td class="right">April 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Pinkert, et al.</td>
+<td class="center">Expires 1 November 2026</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">IPPM Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-pinkert-ippm-ip-measurement-option-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-04-30" class="published">30 April 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2026-11-01">1 November 2026</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">T. J. Pinkert</div>
+<div class="org">Siemens Mobility GmbH</div>
+</div>
+<div class="author">
+      <div class="author-name">N. Masoudifar</div>
+<div class="org">Siemens Mobility GmbH</div>
+</div>
+<div class="author">
+      <div class="author-name">A. A. Nnamdi</div>
+<div class="org">Siemens Mobility GmbH</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">An IPv4 and IPv6 measurement option (MO) for hybrid flow measurements.</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document introduces an internet protocol (IP) measurement option (MO) that
+contains information, normally not available to the receiver of IP packets, to
+perform hybrid network measurements. In particular, measurements that need a
+sender time stamp and a packet order number are then possible directly at the
+receiver. The information contained in the IP MO can also be used by hosts
+en-route to perform slightly more limited hybrid network measurements.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://dutchyatwork.github.io/rfc-draft-ip-measurement-option/#go.draft-pinkert-ippm-ip-measurement-option.html">https://dutchyatwork.github.io/rfc-draft-ip-measurement-option/#go.draft-pinkert-ippm-ip-measurement-option.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-pinkert-ippm-ip-measurement-option/">https://datatracker.ietf.org/doc/draft-pinkert-ippm-ip-measurement-option/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        IP Performance Measurement Working Group mailing list (<span><a href="mailto:ippm@ietf.org">mailto:ippm@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/ippm/">https://mailarchive.ietf.org/arch/browse/ippm/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/ippm/">https://www.ietf.org/mailman/listinfo/ippm/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/DutchyatWork/rfc-draft-ip-measurement-option">https://github.com/DutchyatWork/rfc-draft-ip-measurement-option</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 1 November 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-justification-for-an-ip-mea" class="internal xref">Justification for an IP measurement option</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-metrics-for-the-ip-measurem" class="internal xref">Metrics for the IP measurement option</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-considerations-regarding-th" class="internal xref">Considerations regarding the option content</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-concerning-loss-reordering-" class="internal xref">Concerning loss, reordering and duplicates</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-concerning-network-traversa" class="internal xref">Concerning network traversal time (delay)</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-concerning-microflow-identi" class="internal xref">Concerning microflow identification</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-concerning-packet-selection" class="internal xref">Concerning packet selection for measurement</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-concerning-integrity-of-mea" class="internal xref">Concerning integrity of measurement data</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6">
+                <p id="section-toc.1-1.5.2.6.1"><a href="#section-5.6" class="auto internal xref">5.6</a>.  <a href="#name-concerning-fragmentation-of" class="internal xref">Concerning fragmentation of IP packets</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-determination-of-the-proper" class="internal xref">Determination of the properties of the option content</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-current-state-of-the-art-te" class="internal xref">Current state of the art technology</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-wire-arrival-time-of-the-se" class="internal xref">Wire arrival time of the sender</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-unique-packet-identifier" class="internal xref">Unique packet identifier</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-flow-identifier" class="internal xref">Flow identifier</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.5">
+                <p id="section-toc.1-1.6.2.5.1"><a href="#section-6.5" class="auto internal xref">6.5</a>.  <a href="#name-alternate-marker" class="internal xref">Alternate marker</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.6">
+                <p id="section-toc.1-1.6.2.6.1"><a href="#section-6.6" class="auto internal xref">6.6</a>.  <a href="#name-include-in-calculation-mark" class="internal xref">Include in calculation marker</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.7">
+                <p id="section-toc.1-1.6.2.7.1"><a href="#section-6.7" class="auto internal xref">6.7</a>.  <a href="#name-security-measures" class="internal xref">Security measures</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-ipv4-option-definition" class="internal xref">IPv4 option definition</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-ipv6-option-definition" class="internal xref">IPv6 option definition</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-using-the-ip-measurement-op" class="internal xref">Using the IP measurement option</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-measurement-procedure-on-th" class="internal xref">Measurement procedure on the end hosts</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-measurement-procedure-at-ob" class="internal xref">Measurement procedure at observers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-metrics-and-measurement-pro" class="internal xref">Metrics and Measurement protocols</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
+                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-notes-for-systems-with-real" class="internal xref">Notes for systems with real-time protocols</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.5">
+                <p id="section-toc.1-1.9.2.5.1"><a href="#section-9.5" class="auto internal xref">9.5</a>.  <a href="#name-notes-for-raw-metering-data" class="internal xref">Notes for raw metering data protocols</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-conclusion" class="internal xref">Conclusion</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#section-13.1" class="auto internal xref">13.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#section-13.2" class="auto internal xref">13.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-contributors" class="internal xref">Contributors</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
+            <p id="section-toc.1-1.16.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Hybrid network measurements on differentiated services (DS) microflows
+<span>[<a href="#RFC2475" class="cite xref">RFC2475</a>]</span>, following the IP performance metrics (IPPM) rationale outlined in
+<span>[<a href="#RFC2330" class="cite xref">RFC2330</a>]</span>, can be performed for a limited number of metrics without the need
+for P-type packets. Using hybrid measurements, a complete characterisation of
+an end-to-end path through the internet is not possible. Nevertheless, hybrid
+measurements allow a measurement host to obtain important information about
+the minimum or maximum quality (depending on the situation and metric) that
+the network currently offers.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">The P-type packets used by, e.g., the one-way active measurement protocol
+(OWAMP, <span>[<a href="#RFC4656" class="cite xref">RFC4656</a>]</span>) and two-way active measurement protocol (TWAMP,
+<span>[<a href="#RFC5357" class="cite xref">RFC5357</a>]</span>), contain additional information that is needed for the calculation
+of certain metrics. Two important pieces of information are the sequence
+number and the timestamp, that are needed to calculate packet loss metrics and
+packet delay metrics.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">To include such information in an IP packet, for measurement at the IP layer,
+a suitable solution needs to be found. Since the data of IP packets is
+determined by the upper stack configuration and the application protocol, the
+only way is to include this information in the IP header. Fortunately, the
+designers of the IPv4 and IPv6 protocols acknowledged the possibility of
+inclusion of information for various purposes in the IP header as IP options.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This document describes an IPv4 and IPv6 measurement option (MO) for the
+measurement of packet loss, packet delay and other metrics that require a
+sequence number and a timestamp from the sending host at the receiving host.<a href="#section-1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="justification-for-an-ip-measurement-option">
+<section id="section-2">
+      <h2 id="name-justification-for-an-ip-mea">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-justification-for-an-ip-mea" class="section-name selfRef">Justification for an IP measurement option</a>
+      </h2>
+<p id="section-2-1">In internetworks, the IP protocol is the unifying protocol in the network
+stack. At the link layer various network technologies can be deployed that
+are all capable of transporting IP packets. Although measurement techniques
+and specifications are present for the lower layers, it is typically hard to
+implement these such, that data from specific applications on a host can be
+measured.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Another concern is that, at the data link layer, each particular link layer
+protocol adds protocol control information with a technology dependent amount
+of data, to each IP packet. Therefore, measurements performed on various data
+link layers cannot always be compared without assumptions.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">Typical internet applications use "sockets", a concept found in many of the
+major operating systems, where both IP addresses, the transport protocol and
+its port numbers are grouped. This is exactly the definition of a microflow.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-4">Nevertheless, transport layer protocols do typically not have the flexibility
+to allow for measurements at the transport layer, since not all, or maybe even
+least of the, transport protocols, include a sequence number and timestamp in
+their data fragments. Also at the transport layer, the argument holds that
+measurements are not necessarily comparable between different transport
+protocols. In addition, a generic software, would also need adaptation for
+each transport protocol, to perform (comparable) measurements when operating
+higher up in the network stack.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-5">The IP protocol gets part of its flexibility from the capability of inserting
+IP options into the IP header. Together with its unifying properties on
+internet hosts, which allows comparison of measurement data among applications
+and hosts, the network layer with the IP protocol forms the ideal place for
+measurements, as acknowledged by the IPPM framework. The only downside of an
+IP measurement option is that the IP header is enlarged. Adding slightly to
+the amount of data sent through the network. In many cases this is offset by
+the benefits of being capable of assessing the network quality at real-time.<a href="#section-2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-3">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-3-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in <span>[<a href="#BCP14" class="cite xref">BCP14</a>]</span> (<a href="#RFC2119" class="auto internal xref">RFC2119</a>) (<a href="#RFC8174" class="auto internal xref">RFC8174</a>) when, and only when, they
+appear in all capitals, as shown here.<a href="#section-3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="metrics-for-the-ip-measurement-option">
+<section id="section-4">
+      <h2 id="name-metrics-for-the-ip-measurem">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-metrics-for-the-ip-measurem" class="section-name selfRef">Metrics for the IP measurement option</a>
+      </h2>
+<p id="section-4-1">The IP measurement option will be designed specifically for the following
+metrics:
+    - One-way Packet Delay, Mean Packet Delay, Packet Delay Variation,
+    - One-way Packet Loss, Packet Reordering and Packet Duplication.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">The measurement option must be suitable for the measurement of microflows as
+defined by <span>[<a href="#RFC2475" class="cite xref">RFC2475</a>]</span> in the scope of DS. Microflows are identified by IP
+source and destination addresses, the protocol id and transport layer source
+and destination port numbers (when available). Measurements must be possible
+between two end hosts on a point-to-point (P2P) IP link. Extension to multi-
+point-to-multi-point links (MP2MP) should be possible. This requires that each
+packet can be uniquely assigned to a microflow.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">In addition, it should be possible that hosts en-route, can use the IP MO to
+measure or estimate the metrics on a microflow basis. Such measurements can
+be done at boundary / gateway hosts of the network. One difficulty, in this
+case, can be, that not all packets of a microflow must necessarily pass a
+certain host, since paths through the network, for packets of the same micro-
+flow, may differ.<a href="#section-4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="considerations-regarding-the-option-content">
+<section id="section-5">
+      <h2 id="name-considerations-regarding-th">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-considerations-regarding-th" class="section-name selfRef">Considerations regarding the option content</a>
+      </h2>
+<p id="section-5-1">Data rates and packet rates per microflow can be readily measured by source,
+observer, and destination using a clock and the number of octets per microflow
+traversing the network interface. These metrics do not need additional
+information.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="concerning-loss-reordering-and-duplicates">
+<section id="section-5.1">
+        <h3 id="name-concerning-loss-reordering-">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-concerning-loss-reordering-" class="section-name selfRef">Concerning loss, reordering and duplicates</a>
+        </h3>
+<p id="section-5.1-1">To measure packet losses, reordering and duplication, each packet must be
+uniquely identifiable, and orderable, within the microflow. Only selected
+transport layer protocols include such information, e.g., the TCP protocol.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-2.1">
+            <p id="section-5.1-2.1.1">The IP MO must include information to uniquely identify the position of each
+IP packet in a stream of packets.<a href="#section-5.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="concerning-network-traversal-time-delay">
+<section id="section-5.2">
+        <h3 id="name-concerning-network-traversa">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-concerning-network-traversa" class="section-name selfRef">Concerning network traversal time (delay)</a>
+        </h3>
+<p id="section-5.2-1">To measure packet delay and other time-based properties of the network, the
+time at the start of transmission (wire arrival time at the transmitting host)
+and end of reception (wire exit time at the receiving host) of the IP packet
+must be recorded. It is assumed in this document that hosts hosts have well
+synchronised clocks. Clock synchronization is a topic that is addressed
+abundantly elsewhere (<span>[<a href="#RFC2330" class="cite xref">RFC2330</a>]</span>).<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">The sending host records the start of transmission time, while the receiving
+host records the end of reception time. In combination with the network
+interface speed and the number of octets in the IP packet, the start of
+reception time can be calculated at the receiving host. Note that the
+receiving host can only timestamp at the end of reception, because only then
+is clear that the packet has arrived complete and in good order.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.2-3">An exemption here can be hardware timestamp units that mark the start of
+reception time. However, this time may include the store and forward time of
+the input queue. With the wire arrival time at both hosts, the network delay
+can be determined.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.2-4">The timestamps for start of transmission (transmission time stamp, TTS) and
+start of reception (reception time stamp, RTS), as recorded in the host
+software, may need correction to accurately represent the wire arrival times.
+Such corrections are common in time transfer systems. The correction problem
+however does not change the requirement that the wire arrival time of the
+source needs to be sent to the receiver.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.2-5.1">
+            <p id="section-5.2-5.1.1">The IP MO must contain the wire arrival time of the sender.<a href="#section-5.2-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="concerning-microflow-identification">
+<section id="section-5.3">
+        <h3 id="name-concerning-microflow-identi">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-concerning-microflow-identi" class="section-name selfRef">Concerning microflow identification</a>
+        </h3>
+<p id="section-5.3-1">Although it is assumed that microflows form a single data stream, this must
+not be the case. Consider a user of a computer starting and stopping a group
+of network programs at the same port, contacting the same destination host at
+the same port with the same protocol. It is now unclear, since multiple
+programs were used, if the measured data should be grouped in one measurement
+or not. Another use case is that where the higher layer protocols do not
+contain port numbers in the "classical" sense (classical transport protocols
+are UDP, TCP and other internet transport protocols).<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">This ambiguity is resolved by the inclusion of a flow label in the IPv6
+protocol. A unique flow identifier is assigned, by the sending host, to
+packets belonging to the same microflow.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-3.1">
+            <p id="section-5.3-3.1.1">The IPv4 MO must contain a flow identifier in equivalence to the
+IPv6 protocol.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="concerning-packet-selection-for-measurement">
+<section id="section-5.4">
+        <h3 id="name-concerning-packet-selection">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-concerning-packet-selection" class="section-name selfRef">Concerning packet selection for measurement</a>
+        </h3>
+<p id="section-5.4-1">To apply "alternate marker" methods <span>[<a href="#RFC9341" class="cite xref">RFC9341</a>]</span>, there must be a way to apply
+a (single bit) marker in the IP header. This can be done using the DSCP
+<span>[<a href="#RFC2474" class="cite xref">RFC2474</a>]</span> field of the IP packet, and alternating two code points while
+keeping the transport properties for both code points equal, or by abusing
+the single bit that is still free in the CU fields specified in <span>[<a href="#RFC2474" class="cite xref">RFC2474</a>]</span>.
+The first would need broader support to implement the method, the latter
+would void the internet standards. Notably the ECN <span>[<a href="#RFC3168" class="cite xref">RFC3168</a>]</span> and L4S
+specifications <span>[<a href="#RFC9330" class="cite xref">RFC9330</a>]</span>, <span>[<a href="#RFC9331" class="cite xref">RFC9331</a>]</span>, <span>[<a href="#RFC9332" class="cite xref">RFC9332</a>]</span> that uses these bits.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-2.1">
+            <p id="section-5.4-2.1.1">The MO must contain a marker to enable the use of alternate marker methods.<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.4-3">Another consideration is that measurement software may not be capable of
+processing all packets on high-speed interfaces. In this case, either layer 3
+hardware support would be needed, or statistics could be gathered on only a
+fraction of the packets that are sent. In the latter case it would be
+unfavourable to apply an MO only to the packets that should be measured,
+because network components may react differently on packets of different
+lengths, and, potentially, on packets with different header lengths.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-4.1">
+            <p id="section-5.4-4.1.1">The MO must contain a marker to signal which packets shall be used to
+calculate metrics on.<a href="#section-5.4-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="concerning-integrity-of-measurement-data">
+<section id="section-5.5">
+        <h3 id="name-concerning-integrity-of-mea">
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-concerning-integrity-of-mea" class="section-name selfRef">Concerning integrity of measurement data</a>
+        </h3>
+<p id="section-5.5-1">Since the network traffic with IP measurement options included may pass
+network nodes that are owned by foreign entities, the IP measurement option
+must be protected against manipulation. One way to do this is to include a
+digital signature into the MO option. Another way to do this is to encrypt the
+contents of the measurement option for all hosts that should not read its
+contents.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.5-2.1">
+            <p id="section-5.5-2.1.1">The MO must contain the possibility to include a cryptographic signature.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.5-2.2">
+            <p id="section-5.5-2.2.1">Encryption of the MO contents, potentially including a cryptographic
+signature, must be possible.<a href="#section-5.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="concerning-fragmentation-of-ip-packets">
+<section id="section-5.6">
+        <h3 id="name-concerning-fragmentation-of">
+<a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-concerning-fragmentation-of" class="section-name selfRef">Concerning fragmentation of IP packets</a>
+        </h3>
+<p id="section-5.6-1">Fragmentation of IP packets works as follows. The IP header of a packet that
+needs fragmentation, is copied into each fragment. The data of the IP packet
+is cut into slices, and each slice is added to a new fragment. Then the more
+fragments flag and the fragment offset fields are set / updated. The more
+fragments flag is set to zero on the last fragment.<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.6-2">The identifier field is used to distinguish fragments of more than one
+package. The sending host must ensure that the same identifier value is not
+reused when packets can still be under way in the network (network timeout,
+255 seconds). Due to this reason, modern layer 4 protocols, notoriously the
+TCP protocol try to avoid that IP packets are fragmented, since only 64k
+fragments can be underway in an IP network at the same time. It can be
+understood that with the current higher speed network interfaces, this poses a
+limitation on the data throughput possible for a single microflow.<a href="#section-5.6-2" class="pilcrow">¶</a></p>
+<p id="section-5.6-3">Nevertheless it is good practice to consider fragmentation in the design of an
+IP measurement option. The specification of IPv4 options provides the copy
+flag, that allow an option to be present in the first fragment only, or to
+copy it into all fragments.<a href="#section-5.6-3" class="pilcrow">¶</a></p>
+<p id="section-5.6-4">Since our IP measurement option could still be used to obtain information on
+the network performance by hosts enroute, when it is present on fragments of
+an IP datagram, it would be favourable to copy the data of the IP measurement
+option into each fragment.<a href="#section-5.6-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.6-5.1">
+            <p id="section-5.6-5.1.1">The IP MO must be included in all fragments of an IP datagram.<a href="#section-5.6-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.6-6">Fragments of a datagram can be identified by the identifier, fragmented flag,
+and the contents of the fragment offset field. This may help enroute hosts
+to interpret "the same" IP measurement option as not belonging to a packet
+duplicate. This also allows to measure fragment duplications both on the
+enroute host, as well as on the receiving host, that can be introduced as
+measurement additions. In this way fragment delay, loss, reordering or
+duplication statistics can be determined in addition.<a href="#section-5.6-6" class="pilcrow">¶</a></p>
+<p id="section-5.6-7">The main measurements are to be performed on the source and destination hosts
+before fragmentation is performed and after re-assembly of fragments. This
+also means that measurements by systems "on the path" may yield different
+results than those on the end systems, unless they are capable of marking
+whether all fragments have passed such a system.<a href="#section-5.6-7" class="pilcrow">¶</a></p>
+<p id="section-5.6-8">Since IPv4 packets, in contrast to IPv6 packets, can be fragmented by hosts
+enroute, fragmentation statistics may differ for various network segments.<a href="#section-5.6-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="determination-of-the-properties-of-the-option-content">
+<section id="section-6">
+      <h2 id="name-determination-of-the-proper">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-determination-of-the-proper" class="section-name selfRef">Determination of the properties of the option content</a>
+      </h2>
+<p id="section-6-1">In this section the contents of the MO determined above is specified
+specifically, based on the available technology and boundaries of the
+possibilities that an IP option offers. The following items were identified.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-2.1">
+          <p id="section-6-2.1.1">The IP MO must contain the wire arrival time of the sender.<a href="#section-6-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.2">
+          <p id="section-6-2.2.1">The IP MO must include information to uniquely identify the position of each
+IP packet in a stream of packets.<a href="#section-6-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.3">
+          <p id="section-6-2.3.1">The IPv4 MO must contain a flow identifier in equivalence to the
+IPv6 protocol.<a href="#section-6-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.4">
+          <p id="section-6-2.4.1">The MO must contain a marker to enable the use of alternate marker methods.<a href="#section-6-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.5">
+          <p id="section-6-2.5.1">The MO must contain a marker to signal which packets shall be used to
+calculate metrics on.<a href="#section-6-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.6">
+          <p id="section-6-2.6.1">The MO must contain the possibility to include a cryptographic signature.<a href="#section-6-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.7">
+          <p id="section-6-2.7.1">Encryption of the MO contents, potentially including a cryptographic
+signature, must be possible.<a href="#section-6-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.8">
+          <p id="section-6-2.8.1">The IP MO must be included in all fragments of an IP datagram.<a href="#section-6-2.8.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<div id="current-state-of-the-art-technology">
+<section id="section-6.1">
+        <h3 id="name-current-state-of-the-art-te">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-current-state-of-the-art-te" class="section-name selfRef">Current state of the art technology</a>
+        </h3>
+<p id="section-6.1-1">The fastest data links today measure 1 Tbit/s per channel or more <span>[<a href="#Nokia" class="cite xref">Nokia</a>]</span>. It
+is assumed that 10 Tbit/s data link technology will become feasible in the
+near future. Links based on <span>[<a href="#IEEE802.3" class="cite xref">IEEE802.3</a>]</span> Ethernet have a minimum frame size of
+46 octets and a packet size of 72 octets. A 12 octets inter-frame gap must be
+added. The time to send the data on a 10 Tbit/s link can now be calculated.
+The number of bit times for one frame is 672. Each bit takes 0.1 picoseconds
+to send, therefore sending the minimum length frame takes 67.2 picoseconds.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">On a 1 Pbit/s link, under the assumption that Ethernet frames are used, the
+time to send one minimum-length frame would be 0.672 picoseconds. At the
+latter rate, approx. 1488.1 Ethernet packets can be sent in 1 nanosecond.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">At the network layer, the maximum datagram lifetime (MDL) of IP packets of
+is approximately 120 seconds <span>[<a href="#RFC6864" class="cite xref">RFC6864</a>]</span>.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-4">The IPv4 protocol allows an IP header length of 15 * 32 bits. 10 * 32 bits are
+available for IP options. This is a total of 40 octets of which 38 can be used
+for user content.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<p id="section-6.1-5">The IPv6 protocol allows for 258 octet options of which 256 can be used for
+user contents.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<p id="section-6.1-6">Regarding time transfer techniques, two standards exist. The <span>[<a href="#IEEE1588-2019" class="cite xref">IEEE1588-2019</a>]</span>
+precision time protocol version 3 (PTPv3) is concipated to work with Ethernet,
+the IPv4 and IPv6 protocols, and the UDP protocol. The network time protocol
+version 4 (NTPv4) <span>[<a href="#RFC5905" class="cite xref">RFC5905</a>]</span> is used in the scope of IPv4 and IPv6. The PTP
+protocol favours integer calculation, while the NTP protocol favours binary
+floating point calculations.<a href="#section-6.1-6" class="pilcrow">¶</a></p>
+<p id="section-6.1-7">Time in the Linux OS kernel is delivered in nanoseconds resolution by the
+kernel interface. Time of the MAC OS X mach microkernel is delivered with
+nanosecond resolution as well. Time of the Windows kernel is delivered with a
+100 nanosecond resolution.<a href="#section-6.1-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="wire-arrival-time-of-the-sender">
+<section id="section-6.2">
+        <h3 id="name-wire-arrival-time-of-the-se">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-wire-arrival-time-of-the-se" class="section-name selfRef">Wire arrival time of the sender</a>
+        </h3>
+<p id="section-6.2-1">The sender wire arrival time of the IP packet must be included in the IP
+option, such that the receiver can calculate the packet delay based on the
+receiver wire arrival time of the IP packet. Alternatively, both sender and
+receiver could send the wire arrival time to a third party that can then
+calculate the packet delay.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">For the definition of time the major question is which resolution is
+sufficient. The next question is that of the calculator system. Is calculation
+done in integer of floating-point arithmetic. Integer calculation can be done
+on most machines, floating point arithmetic is expensive, both in hardware as
+well as in software when emulated.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-3">Both in the NTP as well as the PTP protocol, the coarse timescale is kept in
+seconds from the epoch. The PTP protocol reserves 48 bits for the coarse
+timescale, the NTP protocol at least 32 bits, with the possibility of
+extending to 64 bits (the latter is more than enough for all practical
+purposes). The 16-bit format is typically only used for time differences.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">It must be noted that, since the maximum datagram lifetime of an IP packet is
+120 seconds, together with the fact that clocks in modern systems are
+synchronized with one second accuracy, the 7 least significant bits of the
+second counter of the 32- or 48-bit second counter, related to the epoch,
+should normally suffice to uniquely complete the timestamp based on the second
+counter of the receiver clock. Under the assumption that normal IP connections
+are lost within 255 seconds (TTL reduced to 0) an 8-bit seconds counter would
+suffice, it is mentioned in <span>[<a href="#RFC6864" class="cite xref">RFC6864</a>]</span> that this is not always the case. To
+account for links where higher MDLs are possible an arbitrary number of bits
+could be added to this number. A 12-bit seconds counter would allow to
+identify delayed packets uniquely up to 1 hour with clock deviations on the
+systems of up to 150 seconds. This seems sufficient for most earth based
+purposes.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+<p id="section-6.2-5">Only when the need to account for (inter)stellar applications arises, transfer
+of a larger part of the second counter would be needed. A 32-bit seconds
+timestamp allows for link delays of 136 years, which is sufficient for delay
+measurements for space travel within the solar system.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
+<p id="section-6.2-6">The fractional part of the second is encoded as a number of fractions in the
+NTP protocol. Each fraction is 2^(-N) long, where N is the number of bits used
+to encode the fractional seconds. NTP allows 16, 32 or 64 bits fractional
+seconds. The PTP protocol, on the other hand, encodes the fractional seconds
+part as a 32-bit number representing the number of nanoseconds in the
+fraction. Since most binary floating-point numbers have no exact match when
+converting to decimal floating-point numbers, rounding errors must occur when
+converting back and forth between NTP and PTP fractions. Reasons why to choose
+one format over the other must thus come from elsewhere.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
+<p id="section-6.2-7">A reason to favour the NTP format, may lie in the simplicity of certain
+calculations. Conversions between 16-, 32-, and 64-bit values can be performed
+by efficient bitshift operations. Adding and subtracting is also simply
+possible. A potential drawback are that rounding errors to nanoseconds exist,
+and those may not be distributed evenly. This may prevent the use of accurate
+high resolution measurements, where rounding errors may become significant.<a href="#section-6.2-7" class="pilcrow">¶</a></p>
+<p id="section-6.2-8">One reason to favour the PTP format, which counts the fraction of time in an
+integer number of nanoseconds, lies in the field of frequency metrology. Many
+physical clocks count time based on a 10 MHz, 100 MHz, 1 GHz or even 10 GHz
+oscillator. These frequencies can be expressed as powers of 10 of a
+nanosecond. In addition, calculations in nanoseconds have a more natural feel
+than those in, e.g., 2^(-32) = 232.8... picosecond units. Other arguments are
+that PTP implementations often feature accurate hardware timestamping units,
+and that all major operating systems deliver time in nanoseconds. Therefore
+the fractional seconds will be represented in nanoseconds.<a href="#section-6.2-8" class="pilcrow">¶</a></p>
+<p id="section-6.2-9">Due to the technical restrictions of an IP option, the format for the
+timestamp must be chosen in a clever way. To represent one second in
+nanoseconds, 30 bits are sufficient. It is proposed to take the thirty least
+significant bits of a 32-bit word for this. Reserving the two most significant
+bits for other purposes. For the seconds part of the timestamp, 7 transferred
+bits are sufficient to reproduce the sender timestamp on the receiver, it
+would make sense to transfer at least an octet second part. The additional
+number of seconds may be used to relieve the requirement on the time
+synchronization of the two systems in use.<a href="#section-6.2-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.2-10.1">
+            <p id="section-6.2-10.1.1">For the IP measurement option, the PTP Timestamp format will be used as the
+basis for both seconds and nanoseconds. The least significant bits of the
+seconds field will be used in the IP measurement option.<a href="#section-6.2-10.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="unique-packet-identifier">
+<section id="section-6.3">
+        <h3 id="name-unique-packet-identifier">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-unique-packet-identifier" class="section-name selfRef">Unique packet identifier</a>
+        </h3>
+<p id="section-6.3-1">The classical means of determining whether packets are sent in order, is by
+use of a counter that increments upon sending of each subsequent packet.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">As discussed in 5.2 each packet will be marked with a sender timestamp with ns
+resolution. On 10 Gbit/s links, sending one minimum size frame takes 67.2 ns.
+Therefore, the timestamp alone suffices to uniquely order packets sent on links
+up to 100 Gbit/s (6.72 ns / frame). At higher link speeds, an additional
+numerator can be used to subdivide the timestamp. For a 1 Pbit/s link, a
+numerator that is capable of counting to 1489 is sufficient to uniquely
+numerate ethernet frames and thus IP packets. This requires at least an 11 bit
+counter.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">The IP ID field seems a good numerator candidate for counting datagrams, but
+it is currently specified to be solely used for fragmentation and reassembly
+by <span>[<a href="#RFC6864" class="cite xref">RFC6864</a>]</span>. Therefore, it is not suitable for measurement purposes (it is
+always zero for unfragmented packets) also because some sources do not vary
+the ID at all.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-4">Duplication detection may be based on hashes <span>[<a href="#RFC6621" class="cite xref">RFC6621</a>]</span>, but loss and
+reordering measurements are not possible when higher protocol layers lack
+information to detect these. This is e.g. the case with UDP. A timestamp can
+thus not replace a numerator field, since it does not show whether packets are
+missing, even on slow links.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
+<p id="section-6.3-5">A unique packet identifier of at least 12 bits is therefore recommended. Only
+on very fast links problems may occur when the counter overflows and multiple
+packet have the same timestamp and unique packet identifier.<a href="#section-6.3-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="flow-identifier">
+<section id="section-6.4">
+        <h3 id="name-flow-identifier">
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-flow-identifier" class="section-name selfRef">Flow identifier</a>
+        </h3>
+<p id="section-6.4-1">The last bit of contents that may be needed for transport layer-less
+protocols is a definition of a microflow identifier. For most current day
+protocols there are 16-bit port numbers specified for source and destination
+ports. This would call for a 32-bit source/destination flow field. On the
+other hand, there are very few protocols without a transport layer. The IP
+packet definition allows only 256 of them, defined by the protocol byte.
+For outgoing flows, a host can only open 2^16 ports, so a 16-bit flow
+identifier for transport-less protocols suffices from this perspective.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+<p id="section-6.4-2">The IPv6 protocol <span>[<a href="#RFC8200" class="cite xref">RFC8200</a>]</span> specifies a 20-bit flow label. Defining 20 bits
+for the flow label allows unification of its use with IPv6 <span>[<a href="#RFC8200" class="cite xref">RFC8200</a>]</span>.<a href="#section-6.4-2" class="pilcrow">¶</a></p>
+<p id="section-6.4-3">It must be noted that flow labels and the IP options are not protected against
+unwanted modifications and are for measurement purposes only. Transport-less
+protocols can open multiple data flows based on higher level protocols (e.g.
+application protocol). It is advised to generate flow labels stateful
+according to <span>[<a href="#RFC6437" class="cite xref">RFC6437</a>]</span>. For compatibility reasons this will be the course of
+action for the IPv4 option.<a href="#section-6.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="alternate-marker">
+<section id="section-6.5">
+        <h3 id="name-alternate-marker">
+<a href="#section-6.5" class="section-number selfRef">6.5. </a><a href="#name-alternate-marker" class="section-name selfRef">Alternate marker</a>
+        </h3>
+<p id="section-6.5-1">Hybrid measurements may be done using an alternate marker method such as
+specified in <span>[<a href="#RFC9341" class="cite xref">RFC9341</a>]</span>. The measurement option could be a way to include such
+a marker independent from, e.g., an alternating DSCP. Therefore, at least one
+bit must be reserved as alternating marker bit.<a href="#section-6.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="include-in-calculation-marker">
+<section id="section-6.6">
+        <h3 id="name-include-in-calculation-mark">
+<a href="#section-6.6" class="section-number selfRef">6.6. </a><a href="#name-include-in-calculation-mark" class="section-name selfRef">Include in calculation marker</a>
+        </h3>
+<p id="section-6.6-1">Since switches and routers may have differentiating behaviour when packet
+sizes differ, the same packet with and without the IP measurement option could
+be treated differently. To allow for unbiased measurements, even when only
+fractions of the packets of a microflow are to be included in measurements,
+the packets that are not to be measured on, must be of the same length. This
+means that a dummy measurement option must be included in the IP header in
+this case. At least one bit must be reserved as "include in calculation" bit,
+to allow the receiver to decide whether to include a packet in the
+measurements or not.<a href="#section-6.6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-measures">
+<section id="section-6.7">
+        <h3 id="name-security-measures">
+<a href="#section-6.7" class="section-number selfRef">6.7. </a><a href="#name-security-measures" class="section-name selfRef">Security measures</a>
+        </h3>
+<p id="section-6.7-1">There are reasons to apply security measures to this data in the packet
+header. Since the IP measurement option can be used to verify an SLA / SLS,
+there may be monetary reasons to falsify the information in the packet, to
+make the measurement system think that all is fine on the network. E.g.,
+forging of the timestamp by the last switch in the path may make the receiver
+think that the packet delay was less than it actually is.<a href="#section-6.7-1" class="pilcrow">¶</a></p>
+<p id="section-6.7-2">There are multiple scenarios thinkable how IT security measures are applied
+to the IP measurement option.<a href="#section-6.7-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.7-3">
+<li id="section-6.7-3.1">
+            <p id="section-6.7-3.1.1">Proof of integrity of the IP measurement option, while keeping the content
+available for third parties to use.<a href="#section-6.7-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-6.7-3.2">
+            <p id="section-6.7-3.2.1">Encryption of the contents of the IP measurement option to hide the content
+for third parties.<a href="#section-6.7-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-6.7-4">Since the IP header, including the IP measurement option can be freely
+manipulated by hosts en-route, it is not possible to avoid that hosts may
+remove the IP measurement option entirely. All fields that need to be
+manipulated are easily adapted. An end-host may know that the IP measurement
+option has been removed, by being configured to expect the IP MO on certain
+connections with other hosts and not receiving any. The configuration can be
+static or dynamic, e.g., by means of a measurement management protocol. Such
+protocols would need definition in a separate RFC.<a href="#section-6.7-4" class="pilcrow">¶</a></p>
+<p id="section-6.7-5">To ensure the integrity of the IP measurement option, a cryptographic
+signature can be used. It could be added as additional bytes to the IP
+measurement option. A HMAC or a hash of the signature can be added when
+symmetric keys are used. The latter has the advantage that the space needed to
+add the hash can be limited, e.g., by including only the first x octets of the
+full hash. It is quite expensive to add a full public/private key signature.<a href="#section-6.7-5" class="pilcrow">¶</a></p>
+<p id="section-6.7-6">Upon signing an option, hosts that know the appropriate keys can verify the
+data in the IP measurement option. Depending on the type of signature used, it
+may be possible for hosts to change the option content and resign. It must,
+therefore, be ensured that, for such types of signatures, only trusted hosts
+obtain the keys. One indication of the presence of a signature is the length
+of the option. Hosts involved in verifying options before making measurements
+should however rely on other sources to determine if they expect signed
+measurement options. In this case they may also reliably detect removal of
+signatures, which is easily possible.<a href="#section-6.7-6" class="pilcrow">¶</a></p>
+<p id="section-6.7-7">Fragmentation must be taken into account, and data in the IP header that is
+required for fragmentation and defragmentation may be changed by systems "on
+the path". It can therefore not be used as input for cryptographic signatures.<a href="#section-6.7-7" class="pilcrow">¶</a></p>
+<p id="section-6.7-8">To perform various measurements the signature must be made over a pseudo
+header including the following data:
+1. IP version
+2. IP internet header length (Fixed value, 10 words)
+3. IP total length (Payload length)
+4. IP protocol type (Next header field)
+4a. (Flow Label)
+5. IP source address
+6. IP destination address
+7. IP measurement option, including:
+    a. IP option type
+    b. IP option length
+    c. IP measurement option data excluding the signature / signature hash.
+8. Hash over the IP packet data. (Hash over Payload)<a href="#section-6.7-8" class="pilcrow">¶</a></p>
+<p id="section-6.7-9">The fields in the pseudo header are composed as follows for the IPv4 protocol:<a href="#section-6.7-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.7-10">
+<pre>
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |Version|  IHL  |          Total Length         |    Protocol   |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                       Source Address                          |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                    Destination Address                        |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ .                                                               .
+ .                   IP measurement option                       .
+ .                                                               .
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                  Hash over IP packet data                     |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-6.7-10" class="pilcrow">¶</a>
+</div>
+<p id="section-6.7-11">The fields in the pseudo header are composed as follows for the IPv6 protocol:<a href="#section-6.7-11" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.7-12">
+<pre>
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |Version|1 0 1 0|         Payload Length        |  Next Header  |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |               Flow Label              |       Reserved        |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +                       Source Address                          +
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +                    Destination Address                        +
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ .                                                               .
+ .                   IP measurement option                       .
+ .                                                               .
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                     Hash over Payload                         |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-6.7-12" class="pilcrow">¶</a>
+</div>
+<p id="section-6.7-13">The hash over the IP packet data (Payload) ensures that port numbers are
+always included when present, independent of the higher layer protocol, since
+it is favoured to make the implementation independent from possible higher
+layer protocols. The requirement on the hash over the IP packet data is that
+it can be quickly calculated, and that spoofing the data takes, on average,
+more time than the network timeout. Alternatively, a cryptographic hash, using
+a private key, may be derived over the pseudo header and the IP packet data
+(Payload). Note that the length of the hash must not be limited to 32 bits.<a href="#section-6.7-13" class="pilcrow">¶</a></p>
+<p id="section-6.7-14">If cryptographic encryption is feasible given the maximum length of 40 octets
+(320 bits) of the IP MO, should be determined elsewhere. Also, which algorithms
+to use are not part of this specification. In any case it would be proper that
+untrusted hosts on the path know that options are encrypted, and cannot be
+used to perform measurements. Therefore, a way to determine whether, or not, an
+encrypted measurement option is used must be present. It is proposed to use
+the option type for these purposes.<a href="#section-6.7-14" class="pilcrow">¶</a></p>
+<p id="section-6.7-15">In all cases the generation and distribution of cryptographic keys is
+performed by use of a secure key distribution protocol, that is not part of
+this specification. This protocol must be capable of generating keys for each
+distinguishable microflow to perform signing or encrypting the IP measurement
+option data.<a href="#section-6.7-15" class="pilcrow">¶</a></p>
+<p id="section-6.7-16">The possibility of signed and encrypted IP measurement options is indicated in
+this RFC, but no particular specification is given yet. Such specifications
+are to be subject of RFCs to be written, as are the specifications for
+measurement management protocols.<a href="#section-6.7-16" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="ipv4-option-definition">
+<section id="section-7">
+      <h2 id="name-ipv4-option-definition">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-ipv4-option-definition" class="section-name selfRef">IPv4 option definition</a>
+      </h2>
+<p id="section-7-1">The maximum length of an IPv4 option is ten 32-bit words, or 40 octets, see
+<span>[<a href="#RFC791" class="cite xref">RFC791</a>]</span>. An IPv4 option always includes the option type. The length octet is
+always present for IPv4 options with more than only the option type. The IPv4
+measurement option is therefore defined as follows.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7-2">
+<pre>
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Option Type  | Option Length |             UID               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |               Flow Label              |         Seconds       |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |I A|                   Nanoseconds                             |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +               (Optional) Cryptographic Signature              +
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-7-2" class="pilcrow">¶</a>
+</div>
+<p id="section-7-3">Option Type: 8 bits<a href="#section-7-3" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-7-4.1">
+          <p id="section-7-4.1.1">The IP measurement option is a debugging and measurement option, and must be
+present in each fragment of an IP datagram. Two option types are requested,
+one for non-encrypted options, with or without signature, and one for
+encrypted options, that can only be read by systems on the path that belong
+to the trusted group of measurement clients.<a href="#section-7-4.1.1" class="pilcrow">¶</a></p>
+<p id="section-7-4.1.2">The option may be skipped over if the Option Type is unknown, and the option
+data does not change en-route.<a href="#section-7-4.1.2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7-4.1.3.1">
+              <p id="section-7-4.1.3.1.1">Bit  8   (copied flag)   : 1 = copied<a href="#section-7-4.1.3.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7-4.1.3.2">
+              <p id="section-7-4.1.3.2.1">Bit  6-7 (option class)  : 2 = debugging and measurement<a href="#section-7-4.1.3.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7-4.1.3.3">
+              <p id="section-7-4.1.3.3.1">Bits 1-5 (option number) : 26 = Unencrypted Measurement Option (UMO),
+                                                 to be assigned by IANA<a href="#section-7-4.1.3.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7-4.1.3.4">
+              <p id="section-7-4.1.3.4.1">Bits 1-5 (option number) : 27 = Encrypted Measurement Option (EMO),
+                                                 to be assigned by IANA<a href="#section-7-4.1.3.4.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-7-4.1.4">Value becomes 218 and 219<a href="#section-7-4.1.4" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-5">Option Length: 8 bits<a href="#section-7-5" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-7-6.1">
+          <p id="section-7-6.1.1">The length of the IP measurement option in octets, including length of the
+cryptographic signature when present. For an encrypted and signed
+measurement option, all octets are included in the length.<a href="#section-7-6.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-7">Unique Identifier (UID): 16 bits<a href="#section-7-7" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-7-8.1">
+          <p id="section-7-8.1.1">The Unique Identifier is incremented for each sent IP packet. This allows
+the receiving host to identify packet losses, duplications and re-orderings.
+It must be noted that each fragment of a fragmented datagram contains a copy
+of the IP measurement option. Therefore systems "on the path" should rely,
+e.g., on the fragment offset to perform such measurements. End-hosts perform
+measurements on the packet before fragmenting and after re-assembly.<a href="#section-7-8.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-9">Flow Label: 20 bits<a href="#section-7-9" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-7-10.1">
+          <p id="section-7-10.1.1">The Flow Label as specified in the IPv6 standard <span>[<a href="#RFC8200" class="cite xref">RFC8200</a>]</span>.<a href="#section-7-10.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-11">Seconds: 12 bits<a href="#section-7-11" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-7-12.1">
+          <p id="section-7-12.1.1">The 12 least significant bits of the seconds field of the PTP Timestamp.<a href="#section-7-12.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-13">Usage Flags: 2 bits<a href="#section-7-13" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-7-14.1">
+          <p id="section-7-14.1.1">The Usage Flags indicate how the option can be used by the receiving host.<a href="#section-7-14.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7-14.1.2.1">
+              <p id="section-7-14.1.2.1.1">Bit 0: 0 = Dont include in measurement', 1 = Include in measurement<a href="#section-7-14.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7-14.1.2.2">
+              <p id="section-7-14.1.2.2.1">Bit 1: Alternate Marker<a href="#section-7-14.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-7-14.1.3">The I(nclude in measurement) flag signals whether or not the IP measurement
+option contains real data. Sending empty data (all 0) may be done to relieve
+computational efforts of the sending systems under high data traffic loads,
+while keeping the IP header size equal for all IP packets. For signed
+connections the cryptographic signature must also be applied on "empty" IP
+measurement options, since spoofing would otherwise be possible.<a href="#section-7-14.1.3" class="pilcrow">¶</a></p>
+<p id="section-7-14.1.4">The A(lternate Marker) can be used to implement alternate marker measurement
+methods. Alternate marker methods using this IP measurement option, must
+specify how they use this bit.<a href="#section-7-14.1.4" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-15">Nanoseconds: 30 bits<a href="#section-7-15" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-7-16.1">
+          <p id="section-7-16.1.1">The nanoseconds field contains the number of nanoseconds of the timestamp.
+When a system is not capable of providing timestamps with nanosecond
+resolution, the highest resolution that can be provided is used and the
+other digits of the nanosecond field are set to 0. When a system uses, e.g.,
+a 16-bit subdivision of one second (such as NTP timestamps may), the decimal
+value is rounded to the nearest nanosecond. Adding or subtracting a certain
+random number of nanoseconds to the result may be used to prevent rounding
+bias. This is up to the implementer of the IP measurement option for a
+system, but must be documented.<a href="#section-7-16.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-17">(Optional) Cryptographic Signature:<a href="#section-7-17" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-7-18.1">
+          <p id="section-7-18.1.1">Optionally up to 7 words, 28 octets, or 224 bits can be used for the
+transmission of a cryptographic signature.<a href="#section-7-18.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-19">The option order has been chosen such that when this option is the first
+option, the data aligns in the IP packet, hopefully resulting in an efficient
+processing in host systems, which would be needed on high-speed links. No
+EOOL option is needed when this option is the only one <span>[<a href="#RFC791" class="cite xref">RFC791</a>]</span>,
+<span>[<a href="#IANA-IP-Option-Numbers" class="cite xref">IANA-IP-Option-Numbers</a>]</span>.<a href="#section-7-19" class="pilcrow">¶</a></p>
+<p id="section-7-20">When the option is encrypted only the first two octets have their normal
+meaning. The rest of the octets form the ciphertext.<a href="#section-7-20" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ipv6-option-definition">
+<section id="section-8">
+      <h2 id="name-ipv6-option-definition">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-ipv6-option-definition" class="section-name selfRef">IPv6 option definition</a>
+      </h2>
+<p id="section-8-1">The maximum length of an IPv6 Hop-by-Hop Option is 255 octets, see <span>[<a href="#RFC8200" class="cite xref">RFC8200</a>]</span>.
+An IPv6 option always includes the option type, and length octet. The IPv6
+measurement option will be defined as follows.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8-2">
+<pre>
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Option Type  | Option Length |           Seconds             |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |I A|                   Nanoseconds                             |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                              UID                              |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +               (Optional) Cryptographic Signature              +
+ |                                                               |
+ +                                                               +
+ |                                                               |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-8-2" class="pilcrow">¶</a>
+</div>
+<p id="section-8-3">Option Type: 8 bits<a href="#section-8-3" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8-4.1">
+          <p id="section-8-4.1.1">The IP measurement option is a debugging and measurement option, and must be
+present in each fragment of an IP datagram. Two option types are requested,
+one for non-encrypted options, with or without signature, and one for
+encrypted options, that can only be read by systems on the path that belong
+to the trusted group of measurement clients.<a href="#section-8-4.1.1" class="pilcrow">¶</a></p>
+<p id="section-8-4.1.2">The option may be skipped over if the Option Type is unknown, and the option
+data does not change en-route.<a href="#section-8-4.1.2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8-4.1.3.1">
+              <p id="section-8-4.1.3.1.1">Bit  8   (copied flag)  : 1 = copied<a href="#section-8-4.1.3.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-8-4.1.3.2">
+              <p id="section-8-4.1.3.2.1">Bit  6-7 (option class  : 2 = debugging and measurement<a href="#section-8-4.1.3.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-8-4.1.3.3">
+              <p id="section-8-4.1.3.3.1">Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),
+                                             to be assigned by IANA<a href="#section-8-4.1.3.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-8-4.1.3.4">
+              <p id="section-8-4.1.3.4.1">Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),
+                                             to be assigned by IANA<a href="#section-8-4.1.3.4.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-8-4.1.4">Value becomes 218 and 219<a href="#section-8-4.1.4" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-5">Option Length: 8 bits<a href="#section-8-5" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8-6.1">
+          <p id="section-8-6.1.1">The length of the IP measurement option in octets, including length of the
+cryptographic signature when present. For an encrypted and signed
+measurement option all octets are included in the length.<a href="#section-8-6.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-7">Seconds: 16 bits<a href="#section-8-7" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8-8.1">
+          <p id="section-8-8.1.1">The 16 least significant bits of the seconds field of the PTP Timestamp.
+When the IPv4 algorithms are used for calculations, the four most
+significant bits of the Seconds field may be skipped.<a href="#section-8-8.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-9">Usage Flags: 2 bits<a href="#section-8-9" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8-10.1">
+          <p id="section-8-10.1.1">The Usage Flags indicate how the option can be used by the receiving host.<a href="#section-8-10.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8-10.1.2.1">
+              <p id="section-8-10.1.2.1.1">Bit 0: 0 = Dont include in measurement', 1 = Include in measurement<a href="#section-8-10.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-8-10.1.2.2">
+              <p id="section-8-10.1.2.2.1">Bit 1: Alternate Marker<a href="#section-8-10.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-8-10.1.3">The I(nclude in measurement) flag signals whether or not the IP measurement
+option contains real data. Sending empty data (all 0) may be done to relieve
+computational efforts of the sending systems under high data traffic loads,
+while keeping the IP header size equal for all IP packets. For signed
+connections the cryptographic signature must also be applied on "empty" IP
+measurement options.<a href="#section-8-10.1.3" class="pilcrow">¶</a></p>
+<p id="section-8-10.1.4">The A(lternate Marker) can be used to implement alternate marker measurement
+methods. Alternate marker methods using this IP measurement option, must
+specify how they use this bit.<a href="#section-8-10.1.4" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-11">Nanoseconds: 30 bits<a href="#section-8-11" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8-12.1">
+          <p id="section-8-12.1.1">The nanoseconds field contains the number of nanoseconds of the timestamp.
+When a system is not capable of providing timestamps with nanosecond
+resolution, the highest resolution that can be provided is used and the
+other digits of the nanosecond field are set to 0. When a system uses, e.g.,
+a 16-bit subdivision of one second (such as NTP timestamps may), the decimal
+value is rounded to the nearest nanosecond. Adding or subtracting a certain
+random number of nanoseconds to the result may be used to prevent rounding
+bias. This is up to the implementer of the IP measurement option for a
+system, but must be documented.<a href="#section-8-12.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-13">Unique Identifier (UID): 32 bits<a href="#section-8-13" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8-14.1">
+          <p id="section-8-14.1.1">The Unique Identifier is incremented for each sent IP packet. This allows
+the receiving host to identify packet losses, duplications and re-orderings.
+It must be noted that each fragment of a fragmented datagram contains a copy
+of the IP measurement option. Therefore systems "on the path" should rely,
+e.g., on the fragment offset to perform such measurements. End-hosts perform
+measurements on the packet before fragmenting and after re-assembly.
+Note that the 16 least significant bits of the UID can be used with the IPv4
+algorithms, since they roll over in similar fashion. The full 32-bit UID has
+relevance on very fast IPv6 links.<a href="#section-8-14.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-15">(Optional) Cryptographic Signature:<a href="#section-8-15" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8-16.1">
+          <p id="section-8-16.1.1">Optionally up to 63 words, 252 octets, or 2016 bits can be used for the
+transmission of a cryptographic signature.<a href="#section-8-16.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-17">As the flow identifier is an integral 20-bit field in the IPv6 header it is
+not included in the IPv6 measurement option. When the option is encrypted only
+the first two octets have their normal meaning. The rest of the octets form
+the ciphertext.<a href="#section-8-17" class="pilcrow">¶</a></p>
+<p id="section-8-18">This option shall be aligned in a 4n fashion.<a href="#section-8-18" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="using-the-ip-measurement-option">
+<section id="section-9">
+      <h2 id="name-using-the-ip-measurement-op">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-using-the-ip-measurement-op" class="section-name selfRef">Using the IP measurement option</a>
+      </h2>
+<p id="section-9-1">The IP MO was defined to enable the hybrid measurement of various statistics
+on Diffserv microflows <span>[<a href="#RFC2474" class="cite xref">RFC2474</a>]</span>. Amongst others these are:
+- One-way Packet Delay, Mean Packet Delay, Packet Delay Variation and related
+  statistics.
+- Packet Losses, Reordering and Duplication<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">The first goal is to measure such statistics on microflows <span>[<a href="#RFC2474" class="cite xref">RFC2474</a>]</span> between
+two end hosts at a point-to-point (P2P) IP link. The statistics can of course
+be extended to multi-point-to-multi-point (MP2MP) links. This requires that
+the packets can be uniquely assigned to a microflow at the IP layer and that
+all properties needed to perform the measurements must be available either by
+a statistics collector or by the destination host(s). It is assumed that each
+microflow is assigned a unique flow identifier by the source host. This means
+that each connection has two microflows, each with its own flow identifier.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-9-3">A second goal is that hosts en route, can try to measure or estimate the
+measurands on a microflow basis. The difficulty here is that not all packets
+must pass a certain host on the route. Nevertheless, useful information can be
+obtained from the estimations made by on route hosts. E.g. the fraction of
+the traffic traversing certain routes A, B, or C.<a href="#section-9-3" class="pilcrow">¶</a></p>
+<p id="section-9-4">As explained, timestamps upon transmission and reception are needed to perform
+delay measurements and their related measurants. To perform packet loss and
+related measurements an incrementing numeration counter is needed (NUM).<a href="#section-9-4" class="pilcrow">¶</a></p>
+<div id="measurement-procedure-on-the-end-hosts">
+<section id="section-9.1">
+        <h3 id="name-measurement-procedure-on-th">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-measurement-procedure-on-th" class="section-name selfRef">Measurement procedure on the end hosts</a>
+        </h3>
+<p id="section-9.1-1">It is more or less assumed that microflows belong to a pair of sockets on the
+source and destination hosts. The operating system (OS) makes counters
+available that can be used by polling or (when a fancier way is needed) by
+an interrupt mechanism. Such interrupts can come at a programmable time, e.g.
+every second. This time interval will be termed measurement interval (MI).
+Since the OS has the timers, this seems a logical scheme. The presence of the
+MO may trigger the calculation of the various statistics, this can be a
+configuration option.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.1-2">Hosts can make two queues available to user space programs where the outgoing
+and incoming IP headers of each flow are queued for user space analysis. For
+incoming packets the reception timestamp is also inserted in this queue.<a href="#section-9.1-2" class="pilcrow">¶</a></p>
+<p id="section-9.1-3">It must however be considered that the statistics are only reliable after the
+maximum packet delay (MPD) of the system, known to the operator, has expired.
+This MPD must thus be configurable but may be set to a default value of 120
+seconds. It is advised to make these settings configurable for per microflow
+at the destination host. It is advised that each MI becoming available after
+MPD is tagged with the start time of the interval at the TAI timescale
+<span>[<a href="#IEEE1588-2019" class="cite xref">IEEE1588-2019</a>]</span> also used in the MO tagged packets.<a href="#section-9.1-3" class="pilcrow">¶</a></p>
+<p id="section-9.1-4">Delay and its related metrics can be readily determined when the destination
+host knows the time when the packet was sent. The source time stamp is
+included in the MO option. If no packets are lost delay statistics can be
+presented immediately to the user.<a href="#section-9.1-4" class="pilcrow">¶</a></p>
+<p id="section-9.1-5">Losses can be calculated when the packet counters on the source and
+destination are compared, but also when the destination knows which packets
+were lost. The packet number (NUM) is therefore included in the MO together
+with the time stamp.<a href="#section-9.1-5" class="pilcrow">¶</a></p>
+<p id="section-9.1-6">When an IP packet is created the space for an MO is reserved in the packet's
+option header and is indicated with a pointer in memory. The flow label can
+be inserted readily. Just before transmission of the first octet of the IP
+packet a timestamp is retrieved from the OS kernel (transmission time stamp
+TTS) and inserted into the IP packet. The colouring counter NUM is inserted
+and increased. The packet is then transmitted by the OS. After transmission
+the kernel updates the kernel counters for transmission. It may, but must
+not, make the IP header available for analysis by forwarding it to a queue
+that can be read by user space programs.<a href="#section-9.1-6" class="pilcrow">¶</a></p>
+<p id="section-9.1-7">The receiving host has memory reserved for a timestamp and the data of an
+incoming IP packet header. When the receiving host sees that an IP packet
+carries the MO option, it generates a timestamp (reception time stamp RTS)
+when the last octet of the packet has been received. When the completeness
+of the packet has been verified (checksums), the MO data and the RTS are used
+to update the kernel statistics. The system may also make the IP header and
+the RTS available for analysis by forwarding it to a queue that can be read
+by user space programs.<a href="#section-9.1-7" class="pilcrow">¶</a></p>
+<p id="section-9.1-8">At the receiving host the following data are used to indicate the flow:
+- source IP address
+- destination IP address
+- flow ID<a href="#section-9.1-8" class="pilcrow">¶</a></p>
+<p id="section-9.1-9">Normally a microflow would be known based on the protocol ID and source and
+destination ports, these can still be used for backward compatibility or
+to calculate metrics on microflows that do not carry the MO option. Thoughts
+on raw data formats for statistical analysis by a data collection system are
+given in Notes for raw metering protocols.<a href="#section-9.1-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="measurement-procedure-at-observers">
+<section id="section-9.2">
+        <h3 id="name-measurement-procedure-at-ob">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-measurement-procedure-at-ob" class="section-name selfRef">Measurement procedure at observers</a>
+        </h3>
+<p id="section-9.2-1">Each switch with deep packet inspection capabilities, each router and host
+observing IP packets with an MO option can generate a RTS upon complete
+reception. Statistics can now be calculated for each microflow. However, care
+must be taken when interpreting these statistics, but they may be useful for
+network fault analysis. In the remainder of this section the possibilities
+and limitations for measurements made by observers will be discussed.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.2-2">The observation on the MPD for end hosts, also holds for observing hosts.
+Therefore, the administrator must be able to set the MPD for gathering
+statistics. An observer may make raw packet headers available for analysis to
+other systems. Observers may contain lists that limit the number of hosts for
+which to gather statistics. This is not very different from the way Diffserv
+determines which microflows to process or not.<a href="#section-9.2-2" class="pilcrow">¶</a></p>
+<p id="section-9.2-3">A speciality for observers is that they cannot be certain that all packets
+that are not lost, pass the system. Therefore, care must be taken when
+calculating statistics. For example, a loss statistic may say more about the
+fraction of microflow packets passing a system than on the actual loss. With
+timestamps and an ID, such fractions can even be detected with high
+certainty.<a href="#section-9.2-3" class="pilcrow">¶</a></p>
+<p id="section-9.2-4">By means of the MO an observer can calculate all statistics that a
+destination host can. It would be possible to introduce additional metrics
+that are specifically tuned for observers. For example, metrics that only
+take largely complete sets of packets to calculate losses, reordering and
+duplication.<a href="#section-9.2-4" class="pilcrow">¶</a></p>
+<p id="section-9.2-5">The following properties can at least be observed with the standard metrics:
+- Fraction of packets passing the observer.
+- One-way Delay and related statistics from source to observer.
+- Packet reordering and duplicates on consecutive sequences of packets.<a href="#section-9.2-5" class="pilcrow">¶</a></p>
+<p id="section-9.2-6">For a full set of observers, one could extend the measurement scheme by
+sending the MO and observer RTS to an external measurement system. Such an
+external system can then calculate more than the individual host. The raw
+data that these systems must transmit to enable this are those the
+destination host transmits.<a href="#section-9.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="metrics-and-measurement-protocols">
+<section id="section-9.3">
+        <h3 id="name-metrics-and-measurement-pro">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-metrics-and-measurement-pro" class="section-name selfRef">Metrics and Measurement protocols</a>
+        </h3>
+<p id="section-9.3-1">The NUM+TTS information is used to generate statistics on the One-way packet
+loss, the one-way packet reordering and the one-way packet duplication.
+Metrics for these properties can be related to those available in the IP
+Performance Metrics (IPPM) framework <span>[<a href="#RFC2330" class="cite xref">RFC2330</a>]</span>, <span>[<a href="#RFC7680" class="cite xref">RFC7680</a>]</span>. The same holds
+for Delay based metrics <span>[<a href="#RFC7679" class="cite xref">RFC7679</a>]</span>, <span>[<a href="#RFC3393" class="cite xref">RFC3393</a>]</span>. On the other hand, the metrics
+could be taken from the Ethernet specifications <span>[<a href="#MEF10.4" class="cite xref">MEF10.4</a>]</span>. This framework
+seems to be more mature at the moment.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<p id="section-9.3-2">When the destination host makes the MO option and necessary information for
+metric determination available to the user space. Advanced metric
+calculations must not take place in kernel space and user space programs can
+be used to make measurement data available according to one or more sets of
+metrics, or may even send the raw data off to a storage server for later
+processing. The idea that information can be available in real-time must not
+be followed since the MPD must always be observed.<a href="#section-9.3-2" class="pilcrow">¶</a></p>
+<p id="section-9.3-3">To send measurement statistics to an overarching data collection system,
+protocols like RMON <span>[<a href="#RFC2819" class="cite xref">RFC2819</a>]</span> and its extensions or IPFIX <span>[<a href="#RFC7011" class="cite xref">RFC7011</a>]</span> can be
+used or extended.<a href="#section-9.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="notes-for-systems-with-real-time-protocols">
+<section id="section-9.4">
+        <h3 id="name-notes-for-systems-with-real">
+<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-notes-for-systems-with-real" class="section-name selfRef">Notes for systems with real-time protocols</a>
+        </h3>
+<p id="section-9.4-1">For systems relying on real-time protocols in the network an MPD of 120
+seconds, or even 10 seconds, may be way to long. Depending on the criticality
+of knowing the network performance near real time, the MPD on sockets
+involved, can be set much lower, e.g. 1 second. This is based on the fact
+that packets that have longer delay have no meaning anymore for such
+protocols and are deemed lost.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="notes-for-raw-metering-data-protocols">
+<section id="section-9.5">
+        <h3 id="name-notes-for-raw-metering-data">
+<a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-notes-for-raw-metering-data" class="section-name selfRef">Notes for raw metering data protocols</a>
+        </h3>
+<p id="section-9.5-1">When sending raw data to an analysis system for full system analysis the
+following must be included in a data unit per measured packet. Such a feature
+can, of course, only be used when the network has sufficient capacity left to
+send this additional data. A protocol specification is left to the
+implementer.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<p id="section-9.5-2">One data unit would contain a flow identification <span>[<a href="#RFC6437" class="cite xref">RFC6437</a>]</span> consisting of:<a href="#section-9.5-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.5-3.1">
+            <p id="section-9.5-3.1.1">source IP address (32 or 128 bit)<a href="#section-9.5-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.2">
+            <p id="section-9.5-3.2.1">destination IP address (32 or 128 bit)<a href="#section-9.5-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.3">
+            <p id="section-9.5-3.3.1">flow ID (20 bit)
+or, when it occupies less bits, a hash (e.g. for IPv6), and measurement data:<a href="#section-9.5-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.4">
+            <p id="section-9.5-3.4.1">NUM field (16 bit)<a href="#section-9.5-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.5">
+            <p id="section-9.5-3.5.1">TTS nanosecond counter (32 bit)<a href="#section-9.5-3.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.6">
+            <p id="section-9.5-3.6.1">TTS second counter (12/16 bit)<a href="#section-9.5-3.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.7">
+            <p id="section-9.5-3.7.1">RTS nanosecond counter (32 bit)<a href="#section-9.5-3.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-3.8">
+            <p id="section-9.5-3.8.1">RTS second counter (12/16 bit)<a href="#section-9.5-3.8.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-9.5-4">for IPv4 this is a total of 188 bits. For IPv6 this could be 160-bit for a
+flow hash (e.g. SHA1) and 104-bit for the measurement data (264 bit). It is
+proposed that source hosts set the RTS fields to 0.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
+<p id="section-9.5-5">Multiple data units can be packed in one IP packet for the measurement system
+A specification for such a protocol can be created when needed. This could
+include the traditional Diffserv ports + protocol for IPv4 for non-MO enabled
+measurements.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
+<p id="section-9.5-6">A consideration could be to include in these data the following data for the
+observer transmission time:<a href="#section-9.5-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.5-7.1">
+            <p id="section-9.5-7.1.1">ONUM field (16 bit)<a href="#section-9.5-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-7.2">
+            <p id="section-9.5-7.2.1">OTTS nanosecond counter (32 bit)<a href="#section-9.5-7.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.5-7.3">
+            <p id="section-9.5-7.3.1">OTTS second counter (12 bit)<a href="#section-9.5-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-9.5-8">where ONUM is the observer NUM field at transmission, and OTTS is the
+observer transmission time stamp. This would allow to separate wire and
+system time for an observer.<a href="#section-9.5-8" class="pilcrow">¶</a></p>
+<p id="section-9.5-9">Alternatively, packets can almost always be identified based on a hash. Hash
+based measurement methods <span>[<a href="#RFC7014" class="cite xref">RFC7014</a>]</span> would nevertheless need to send at least
+the timestamps in order to determine the system delays for packets. It is
+therefore not necessarily cheaper (bit and computation wise) to use a hash
+based measurement approach.<a href="#section-9.5-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-10">
+      <h2 id="name-security-considerations">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-10-1">Security measures were considered during the design of the IP option, but,
+especially in the case of the IPv4 measurement option, possibilities are
+limited due to the limited available space in the IPv4 header. Nevertheless,
+dropping of the IP measurement option cannot be prevented by the end-hosts.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-2">As an alternative to real security measures, it is also possible to share
+information on how to obfuscate the measurement option information for third
+parties. The timestamps and NUM fields may be manipulated by a PRNG of
+sufficient strength to make systems on the packet path that are not in the
+owner's hand, guess about the true values. The systems owned by the entity
+doing the measurements, can share the seeds of the PRNGs, and regularly update
+these, using out of band securely encrypted channels.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-10-3">It must be considered that, with current network systems, data can be recorded
+in abundance, and that obfuscating algorithms may be broken quickly, allowing
+the third party to at least read the data in the IP measurement option.<a href="#section-10-3" class="pilcrow">¶</a></p>
+<p id="section-10-4">However, the author of this RFC would not endorse such a method as secure.<a href="#section-10-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-11">
+      <h2 id="name-iana-considerations">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-11-1">This document requests two IP option numbers to be registered by IANA.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">Option Type: 8 bits<a href="#section-11-2" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-11-3.1">
+          <p id="section-11-3.1.1">The IP measurement option is a debugging and measurement option, and must be
+present in each fragment of an IP datagram carrying the IP measurement
+option. Two option types are requested, one for non-encrypted options,
+with or without signature, and one for encrypted options, that can only be
+read by systems on the path that belong to the trusted group of measurement
+clients.<a href="#section-11-3.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-11-3.1.2.1">
+              <p id="section-11-3.1.2.1.1">Bit      8 (copied flag): 1 = copied<a href="#section-11-3.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-11-3.1.2.2">
+              <p id="section-11-3.1.2.2.1">Bit    6-7 (option class: 2 = debugging and measurement<a href="#section-11-3.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-11-3.1.2.3">
+              <p id="section-11-3.1.2.3.1">Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),
+                                            to be assigned by IANA<a href="#section-11-3.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-11-3.1.2.4">
+              <p id="section-11-3.1.2.4.1">Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),
+                                            to be assigned by IANA<a href="#section-11-3.1.2.4.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-11-3.1.3">This means values 218 and 219<a href="#section-11-3.1.3" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-11-4">It depends on the IANA policy if the option number for encrypted options
+should already be reserved, since there is no current implementation of it
+and the IP option registry space is very limited.<a href="#section-11-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conclusion">
+<section id="section-12">
+      <h2 id="name-conclusion">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-conclusion" class="section-name selfRef">Conclusion</a>
+      </h2>
+<p id="section-12-1">An IPv4 and IPv6 option was introduced that is flexible enough to support
+various measurement schemes on various types of IP traffic. Although it ads
+to the length of the IP packet, it can be used to measure traffic in
+situations where full statistics are needed (e.g., systems with stringent
+SLS requirements on delay and packet loss) and bandwidth is not the limitation
+for applications.<a href="#section-12-1" class="pilcrow">¶</a></p>
+<p id="section-12-2">Measurement procedures and relevant metrics are to be discussed in companion
+RFCs.<a href="#section-12-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-13">
+      <h2 id="name-references">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-13.1">
+        <h3 id="name-normative-references">
+<a href="#section-13.1" class="section-number selfRef">13.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="BCP14">[BCP14]</dt>
+        <dd>
+<div class="refInstance">Best Current Practice 14, <span>&lt;<a href="https://www.rfc-editor.org/info/bcp14">https://www.rfc-editor.org/info/bcp14</a>&gt;</span>.<br><span>At the time of writing, this BCP comprises the following:</span>
+</div>
+<div class="refInstance" id="RFC2119">
+            <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </div>
+<div class="refInstance" id="RFC8174">
+            <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </div>
+</dd>
+<dd class="break"></dd>
+<dt id="RFC791">[RFC791]</dt>
+        <dd>
+<span class="refAuthor">Postel, J.</span>, <span class="refTitle">"Internet Protocol"</span>, <span class="seriesInfo">STD 5</span>, <span class="seriesInfo">RFC 791</span>, <span class="seriesInfo">DOI 10.17487/RFC0791</span>, <time datetime="1981-09" class="refDate">September 1981</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc791">https://www.rfc-editor.org/rfc/rfc791</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8200">[RFC8200]</dt>
+      <dd>
+<span class="refAuthor">Deering, S.</span> and <span class="refAuthor">R. Hinden</span>, <span class="refTitle">"Internet Protocol, Version 6 (IPv6) Specification"</span>, <span class="seriesInfo">STD 86</span>, <span class="seriesInfo">RFC 8200</span>, <span class="seriesInfo">DOI 10.17487/RFC8200</span>, <time datetime="2017-07" class="refDate">July 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8200">https://www.rfc-editor.org/rfc/rfc8200</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-13.2">
+        <h3 id="name-informative-references">
+<a href="#section-13.2" class="section-number selfRef">13.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="IANA-IP-Option-Numbers">[IANA-IP-Option-Numbers]</dt>
+        <dd>
+<span class="refAuthor">IANA</span>, <span class="refTitle">"IP Option Numbers"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1">https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="IEEE1588-2019">[IEEE1588-2019]</dt>
+        <dd>
+<span class="refAuthor">Institute of Electrical and Electronics Engineers</span>, <span class="refTitle">"IEEE Standard for a Precision Clock Synchronization Protocol for Networked Measurement and Control Systems"</span>, <time datetime="2019-11" class="refDate">November 2019</time>. </dd>
+<dd class="break"></dd>
+<dt id="IEEE802.3">[IEEE802.3]</dt>
+        <dd>
+<span class="refAuthor">Institute of Electrical and Electronics Engineers</span>, <span class="refTitle">"IEEE Standard for Ethernet"</span>, <time datetime="2022-05" class="refDate">May 2022</time>. </dd>
+<dd class="break"></dd>
+<dt id="MEF10.4">[MEF10.4]</dt>
+        <dd>
+<span class="refAuthor">Metro Ethernet Forum</span>, <span class="refTitle">"Subscriber Ethernet Service Attributes"</span>, <time datetime="2018-12" class="refDate">December 2018</time>. </dd>
+<dd class="break"></dd>
+<dt id="Nokia">[Nokia]</dt>
+        <dd>
+<span class="refAuthor">Nokia</span>, <span class="refTitle">"Noka Bell Labs' world records and innovations in fibre optics to enable faster and higher capacity 5G networks of the future"</span>, <time datetime="2020-03" class="refDate">March 2020</time>, <span>&lt;<a href="https://www.nokia.com/about-us/news/releases/2020/03/13/nokia-bell-labs-world-records-and-innovations-in-fiber-optics-to-enable-faster-and-higher-capacity-5g-networks-of-the-future/">https://www.nokia.com/about-us/news/releases/2020/03/13/nokia-bell-labs-world-records-and-innovations-in-fiber-optics-to-enable-faster-and-higher-capacity-5g-networks-of-the-future/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1122">[RFC1122]</dt>
+        <dd>
+<span class="refAuthor">Braden, R., Ed.</span>, <span class="refTitle">"Requirements for Internet Hosts - Communication Layers"</span>, <span class="seriesInfo">STD 3</span>, <span class="seriesInfo">RFC 1122</span>, <span class="seriesInfo">DOI 10.17487/RFC1122</span>, <time datetime="1989-10" class="refDate">October 1989</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1122">https://www.rfc-editor.org/rfc/rfc1122</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2330">[RFC2330]</dt>
+        <dd>
+<span class="refAuthor">Paxson, V.</span>, <span class="refAuthor">Almes, G.</span>, <span class="refAuthor">Mahdavi, J.</span>, and <span class="refAuthor">M. Mathis</span>, <span class="refTitle">"Framework for IP Performance Metrics"</span>, <span class="seriesInfo">RFC 2330</span>, <span class="seriesInfo">DOI 10.17487/RFC2330</span>, <time datetime="1998-05" class="refDate">May 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2330">https://www.rfc-editor.org/rfc/rfc2330</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2474">[RFC2474]</dt>
+        <dd>
+<span class="refAuthor">Nichols, K.</span>, <span class="refAuthor">Blake, S.</span>, <span class="refAuthor">Baker, F.</span>, and <span class="refAuthor">D. Black</span>, <span class="refTitle">"Definition of the Differentiated Services Field (DS Field) in the IPv4 and IPv6 Headers"</span>, <span class="seriesInfo">RFC 2474</span>, <span class="seriesInfo">DOI 10.17487/RFC2474</span>, <time datetime="1998-12" class="refDate">December 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2474">https://www.rfc-editor.org/rfc/rfc2474</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2475">[RFC2475]</dt>
+        <dd>
+<span class="refAuthor">Blake, S.</span>, <span class="refAuthor">Black, D.</span>, <span class="refAuthor">Carlson, M.</span>, <span class="refAuthor">Davies, E.</span>, <span class="refAuthor">Wang, Z.</span>, and <span class="refAuthor">W. Weiss</span>, <span class="refTitle">"An Architecture for Differentiated Services"</span>, <span class="seriesInfo">RFC 2475</span>, <span class="seriesInfo">DOI 10.17487/RFC2475</span>, <time datetime="1998-12" class="refDate">December 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2475">https://www.rfc-editor.org/rfc/rfc2475</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2819">[RFC2819]</dt>
+        <dd>
+<span class="refAuthor">Waldbusser, S.</span>, <span class="refTitle">"Remote Network Monitoring Management Information Base"</span>, <span class="seriesInfo">STD 59</span>, <span class="seriesInfo">RFC 2819</span>, <span class="seriesInfo">DOI 10.17487/RFC2819</span>, <time datetime="2000-05" class="refDate">May 2000</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2819">https://www.rfc-editor.org/rfc/rfc2819</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3168">[RFC3168]</dt>
+        <dd>
+<span class="refAuthor">Ramakrishnan, K.</span>, <span class="refAuthor">Floyd, S.</span>, and <span class="refAuthor">D. Black</span>, <span class="refTitle">"The Addition of Explicit Congestion Notification (ECN) to IP"</span>, <span class="seriesInfo">RFC 3168</span>, <span class="seriesInfo">DOI 10.17487/RFC3168</span>, <time datetime="2001-09" class="refDate">September 2001</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3168">https://www.rfc-editor.org/rfc/rfc3168</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3393">[RFC3393]</dt>
+        <dd>
+<span class="refAuthor">Demichelis, C.</span> and <span class="refAuthor">P. Chimento</span>, <span class="refTitle">"IP Packet Delay Variation Metric for IP Performance Metrics (IPPM)"</span>, <span class="seriesInfo">RFC 3393</span>, <span class="seriesInfo">DOI 10.17487/RFC3393</span>, <time datetime="2002-11" class="refDate">November 2002</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3393">https://www.rfc-editor.org/rfc/rfc3393</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4656">[RFC4656]</dt>
+        <dd>
+<span class="refAuthor">Shalunov, S.</span>, <span class="refAuthor">Teitelbaum, B.</span>, <span class="refAuthor">Karp, A.</span>, <span class="refAuthor">Boote, J.</span>, and <span class="refAuthor">M. Zekauskas</span>, <span class="refTitle">"A One-way Active Measurement Protocol (OWAMP)"</span>, <span class="seriesInfo">RFC 4656</span>, <span class="seriesInfo">DOI 10.17487/RFC4656</span>, <time datetime="2006-09" class="refDate">September 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4656">https://www.rfc-editor.org/rfc/rfc4656</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5357">[RFC5357]</dt>
+        <dd>
+<span class="refAuthor">Hedayat, K.</span>, <span class="refAuthor">Krzanowski, R.</span>, <span class="refAuthor">Morton, A.</span>, <span class="refAuthor">Yum, K.</span>, and <span class="refAuthor">J. Babiarz</span>, <span class="refTitle">"A Two-Way Active Measurement Protocol (TWAMP)"</span>, <span class="seriesInfo">RFC 5357</span>, <span class="seriesInfo">DOI 10.17487/RFC5357</span>, <time datetime="2008-10" class="refDate">October 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5357">https://www.rfc-editor.org/rfc/rfc5357</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5905">[RFC5905]</dt>
+        <dd>
+<span class="refAuthor">Mills, D.</span>, <span class="refAuthor">Martin, J., Ed.</span>, <span class="refAuthor">Burbank, J.</span>, and <span class="refAuthor">W. Kasch</span>, <span class="refTitle">"Network Time Protocol Version 4: Protocol and Algorithms Specification"</span>, <span class="seriesInfo">RFC 5905</span>, <span class="seriesInfo">DOI 10.17487/RFC5905</span>, <time datetime="2010-06" class="refDate">June 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5905">https://www.rfc-editor.org/rfc/rfc5905</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6437">[RFC6437]</dt>
+        <dd>
+<span class="refAuthor">Amante, S.</span>, <span class="refAuthor">Carpenter, B.</span>, <span class="refAuthor">Jiang, S.</span>, and <span class="refAuthor">J. Rajahalme</span>, <span class="refTitle">"IPv6 Flow Label Specification"</span>, <span class="seriesInfo">RFC 6437</span>, <span class="seriesInfo">DOI 10.17487/RFC6437</span>, <time datetime="2011-11" class="refDate">November 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6437">https://www.rfc-editor.org/rfc/rfc6437</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6621">[RFC6621]</dt>
+        <dd>
+<span class="refAuthor">Macker, J., Ed.</span>, <span class="refTitle">"Simplified Multicast Forwarding"</span>, <span class="seriesInfo">RFC 6621</span>, <span class="seriesInfo">DOI 10.17487/RFC6621</span>, <time datetime="2012-05" class="refDate">May 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6621">https://www.rfc-editor.org/rfc/rfc6621</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6864">[RFC6864]</dt>
+        <dd>
+<span class="refAuthor">Touch, J.</span>, <span class="refTitle">"Updated Specification of the IPv4 ID Field"</span>, <span class="seriesInfo">RFC 6864</span>, <span class="seriesInfo">DOI 10.17487/RFC6864</span>, <time datetime="2013-02" class="refDate">February 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6864">https://www.rfc-editor.org/rfc/rfc6864</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7011">[RFC7011]</dt>
+        <dd>
+<span class="refAuthor">Claise, B., Ed.</span>, <span class="refAuthor">Trammell, B., Ed.</span>, and <span class="refAuthor">P. Aitken</span>, <span class="refTitle">"Specification of the IP Flow Information Export (IPFIX) Protocol for the Exchange of Flow Information"</span>, <span class="seriesInfo">STD 77</span>, <span class="seriesInfo">RFC 7011</span>, <span class="seriesInfo">DOI 10.17487/RFC7011</span>, <time datetime="2013-09" class="refDate">September 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7011">https://www.rfc-editor.org/rfc/rfc7011</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7014">[RFC7014]</dt>
+        <dd>
+<span class="refAuthor">D'Antonio, S.</span>, <span class="refAuthor">Zseby, T.</span>, <span class="refAuthor">Henke, C.</span>, and <span class="refAuthor">L. Peluso</span>, <span class="refTitle">"Flow Selection Techniques"</span>, <span class="seriesInfo">RFC 7014</span>, <span class="seriesInfo">DOI 10.17487/RFC7014</span>, <time datetime="2013-09" class="refDate">September 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7014">https://www.rfc-editor.org/rfc/rfc7014</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7679">[RFC7679]</dt>
+        <dd>
+<span class="refAuthor">Almes, G.</span>, <span class="refAuthor">Kalidindi, S.</span>, <span class="refAuthor">Zekauskas, M.</span>, and <span class="refAuthor">A. Morton, Ed.</span>, <span class="refTitle">"A One-Way Delay Metric for IP Performance Metrics (IPPM)"</span>, <span class="seriesInfo">STD 81</span>, <span class="seriesInfo">RFC 7679</span>, <span class="seriesInfo">DOI 10.17487/RFC7679</span>, <time datetime="2016-01" class="refDate">January 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7679">https://www.rfc-editor.org/rfc/rfc7679</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7680">[RFC7680]</dt>
+        <dd>
+<span class="refAuthor">Almes, G.</span>, <span class="refAuthor">Kalidindi, S.</span>, <span class="refAuthor">Zekauskas, M.</span>, and <span class="refAuthor">A. Morton, Ed.</span>, <span class="refTitle">"A One-Way Loss Metric for IP Performance Metrics (IPPM)"</span>, <span class="seriesInfo">STD 82</span>, <span class="seriesInfo">RFC 7680</span>, <span class="seriesInfo">DOI 10.17487/RFC7680</span>, <time datetime="2016-01" class="refDate">January 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7680">https://www.rfc-editor.org/rfc/rfc7680</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7799">[RFC7799]</dt>
+        <dd>
+<span class="refAuthor">Morton, A.</span>, <span class="refTitle">"Active and Passive Metrics and Methods (with Hybrid Types In-Between)"</span>, <span class="seriesInfo">RFC 7799</span>, <span class="seriesInfo">DOI 10.17487/RFC7799</span>, <time datetime="2016-05" class="refDate">May 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7799">https://www.rfc-editor.org/rfc/rfc7799</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9330">[RFC9330]</dt>
+        <dd>
+<span class="refAuthor">Briscoe, B., Ed.</span>, <span class="refAuthor">De Schepper, K.</span>, <span class="refAuthor">Bagnulo, M.</span>, and <span class="refAuthor">G. White</span>, <span class="refTitle">"Low Latency, Low Loss, and Scalable Throughput (L4S) Internet Service: Architecture"</span>, <span class="seriesInfo">RFC 9330</span>, <span class="seriesInfo">DOI 10.17487/RFC9330</span>, <time datetime="2023-01" class="refDate">January 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9330">https://www.rfc-editor.org/rfc/rfc9330</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9331">[RFC9331]</dt>
+        <dd>
+<span class="refAuthor">De Schepper, K.</span> and <span class="refAuthor">B. Briscoe, Ed.</span>, <span class="refTitle">"The Explicit Congestion Notification (ECN) Protocol for Low Latency, Low Loss, and Scalable Throughput (L4S)"</span>, <span class="seriesInfo">RFC 9331</span>, <span class="seriesInfo">DOI 10.17487/RFC9331</span>, <time datetime="2023-01" class="refDate">January 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9331">https://www.rfc-editor.org/rfc/rfc9331</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9332">[RFC9332]</dt>
+        <dd>
+<span class="refAuthor">De Schepper, K.</span>, <span class="refAuthor">Briscoe, B., Ed.</span>, and <span class="refAuthor">G. White</span>, <span class="refTitle">"Dual-Queue Coupled Active Queue Management (AQM) for Low Latency, Low Loss, and Scalable Throughput (L4S)"</span>, <span class="seriesInfo">RFC 9332</span>, <span class="seriesInfo">DOI 10.17487/RFC9332</span>, <time datetime="2023-01" class="refDate">January 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9332">https://www.rfc-editor.org/rfc/rfc9332</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9341">[RFC9341]</dt>
+      <dd>
+<span class="refAuthor">Fioccola, G., Ed.</span>, <span class="refAuthor">Cociglio, M.</span>, <span class="refAuthor">Mirsky, G.</span>, <span class="refAuthor">Mizrahi, T.</span>, and <span class="refAuthor">T. Zhou</span>, <span class="refTitle">"Alternate-Marking Method"</span>, <span class="seriesInfo">RFC 9341</span>, <span class="seriesInfo">DOI 10.17487/RFC9341</span>, <time datetime="2022-12" class="refDate">December 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9341">https://www.rfc-editor.org/rfc/rfc9341</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-A">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-A-1">Tjeerd Pinkert wants to thank Gert Bolz, and Benjamin Schilling for their
+support of the hybrid network measurements innovation project, and Sascha
+Liebscher, Achim Willers, Tobias Grosch, and Jaime Lazaro Calderon for their
+support to make this work possible within Siemens Mobility.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="contributors">
+<section id="appendix-B">
+      <h2 id="name-contributors">
+<a href="#name-contributors" class="section-name selfRef">Contributors</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Benjamin Schilling</span></div>
+<div dir="auto" class="left"><span class="org">Siemens Mobility GmbH</span></div>
+<div dir="auto" class="left"><span class="street-address">Ackerstrasse 22</span></div>
+<div dir="auto" class="left">
+<span class="postal-code">38126</span> <span class="locality">Braunschweig</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">Germany</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:benjamin.schilling@siemens.com" class="email">benjamin.schilling@siemens.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://www.mobility.siemens.com" class="url">https://www.mobility.siemens.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Gert Bolz</span></div>
+<div dir="auto" class="left"><span class="org">Siemens Mobility GmbH</span></div>
+<div dir="auto" class="left"><span class="street-address">Ackerstrasse 22</span></div>
+<div dir="auto" class="left">
+<span class="postal-code">38126</span> <span class="locality">Braunschweig</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">Germany</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:gert.bolz@siemens.com" class="email">gert.bolz@siemens.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://www.mobility.siemens.com" class="url">https://www.mobility.siemens.com</a>
+</div>
+</address>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Tjeerd J. Pinkert</span></div>
+<div dir="auto" class="left"><span class="org">Siemens Mobility GmbH</span></div>
+<div dir="auto" class="left"><span class="street-address">Ackerstrasse 22</span></div>
+<div dir="auto" class="left">
+<span class="postal-code">38126</span> <span class="locality">Braunschweig</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">Germany</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:tjeerd.pinkert@siemens.com" class="email">tjeerd.pinkert@siemens.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://www.mobility.siemens.com" class="url">https://www.mobility.siemens.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Negar Masoudifar</span></div>
+<div dir="auto" class="left"><span class="org">Siemens Mobility GmbH</span></div>
+<div dir="auto" class="left"><span class="street-address">Ackerstrasse 22</span></div>
+<div dir="auto" class="left">
+<span class="postal-code">38126</span> <span class="locality">Braunschweig</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">Germany</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:negar.masoudifar@siemens.com" class="email">negar.masoudifar@siemens.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://www.mobility.siemens.com" class="url">https://www.mobility.siemens.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Akachukwu Adnife Nnamdi</span></div>
+<div dir="auto" class="left"><span class="org">Siemens Mobility GmbH</span></div>
+<div dir="auto" class="left"><span class="street-address">Ackerstrasse 22</span></div>
+<div dir="auto" class="left">
+<span class="postal-code">38126</span> <span class="locality">Braunschweig</span>
+</div>
+<div dir="auto" class="left"><span class="country-name">Germany</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:akachukwu.nnamdi@siemens.com" class="email">akachukwu.nnamdi@siemens.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://www.mobility.siemens.com" class="url">https://www.mobility.siemens.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
