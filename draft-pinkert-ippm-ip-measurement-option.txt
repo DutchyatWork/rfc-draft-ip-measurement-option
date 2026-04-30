@@ -1251,20 +1251,26 @@ Table of Contents
    This document requests two IP option numbers to be registered by
    IANA.
 
-   Option Type: 8 bits The IP measurement option is a debugging and
-   measurement option, and must be present in each fragment of an IP
-   datagram carrying the IP measurement option.  Two option types are
-   requested, one for non-encrypted options, with or without signature,
-   and one for encrypted options, that can only be read by systems on
-   the path that belong to the trusted group of measurement clients.
+   Option Type: 8 bits
 
-   Bit 8 (copied flag): 1 = copied Bit 6-7 (option class: 2 = debugging
-   and measurement Bits 1-5 (option number): 26 = Unencrypted
-   Measurement Option (UMO), to be assigned by IANA Bits 1-5 (option
-   number): 27 = Encrypted Measurement Option (EMO), to be assigned by
-   IANA
+      The IP measurement option is a debugging and measurement option,
+      and must be present in each fragment of an IP datagram carrying
+      the IP measurement option.  Two option types are requested, one
+      for non-encrypted options, with or without signature, and one for
+      encrypted options, that can only be read by systems on the path
+      that belong to the trusted group of measurement clients.
 
-   This means values 218 and 219
+      -  Bit 8 (copied flag): 1 = copied
+
+      -  Bit 6-7 (option class: 2 = debugging and measurement
+
+      -  Bits 1-5 (option number): 26 = Unencrypted Measurement Option
+         (UMO), to be assigned by IANA
+
+      -  Bits 1-5 (option number): 27 = Encrypted Measurement Option
+         (EMO), to be assigned by IANA
+
+      This means values 218 and 219
 
    It depends on the IANA policy if the option number for encrypted
    options should already be reserved, since there is no current
