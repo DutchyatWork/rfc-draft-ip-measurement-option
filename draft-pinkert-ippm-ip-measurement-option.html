@@ -2497,37 +2497,22 @@ the third party to at least read the data in the IP measurement option.<a href="
 <a href="#section-11" class="section-number selfRef">11. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
 <p id="section-11-1">This document requests two IP option numbers to be registered by IANA.<a href="#section-11-1" class="pilcrow">¶</a></p>
-<p id="section-11-2">Option Type: 8 bits<a href="#section-11-2" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-11-3.1">
-          <p id="section-11-3.1.1">The IP measurement option is a debugging and measurement option, and must be
-present in each fragment of an IP datagram carrying the IP measurement
-option. Two option types are requested, one for non-encrypted options,
-with or without signature, and one for encrypted options, that can only be
-read by systems on the path that belong to the trusted group of measurement
-clients.<a href="#section-11-3.1.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11-3.1.2.1">
-              <p id="section-11-3.1.2.1.1">Bit      8 (copied flag): 1 = copied<a href="#section-11-3.1.2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-11-3.1.2.2">
-              <p id="section-11-3.1.2.2.1">Bit    6-7 (option class: 2 = debugging and measurement<a href="#section-11-3.1.2.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-11-3.1.2.3">
-              <p id="section-11-3.1.2.3.1">Bits 1-5 (option number): 26 = Unencrypted Measurement Option (UMO),
-                                            to be assigned by IANA<a href="#section-11-3.1.2.3.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-11-3.1.2.4">
-              <p id="section-11-3.1.2.4.1">Bits 1-5 (option number): 27 = Encrypted Measurement Option (EMO),
-                                            to be assigned by IANA<a href="#section-11-3.1.2.4.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-<p id="section-11-3.1.3">This means values 218 and 219<a href="#section-11-3.1.3" class="pilcrow">¶</a></p>
-</li>
-      </ul>
-<p id="section-11-4">It depends on the IANA policy if the option number for encrypted options
+<div class="alignLeft art-text artwork" id="section-11-2">
+<pre>
+Name: Unencrypted measurement option
+Abbreviation: UMO
+Option class: Debugging and measurement (2)
+Copy: Yes (1)
+
+Name: Encrypted measurement option
+Abbreviation: EMO
+Option class: Debugging and measurement (2)
+Copy: Yes (1)
+</pre><a href="#section-11-2" class="pilcrow">¶</a>
+</div>
+<p id="section-11-3">It depends on the IANA policy if the option number for encrypted options
 should already be reserved, since there is no current implementation of it
-and the IP option registry space is very limited.<a href="#section-11-4" class="pilcrow">¶</a></p>
+and the IP option registry space is very limited.<a href="#section-11-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conclusion">
